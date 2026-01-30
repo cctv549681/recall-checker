@@ -1,0 +1,66 @@
+<!--index.wxml-->
+<view class="container">
+  <!-- 顶部 -->
+  <view class="flex-between">
+    <image class="icon-small" src="/assets/nestle-logo.png" mode="aspectFit"></image>
+    <text class="text-title">产品召回查询</text>
+  </view>
+
+  <!-- 主操作区 -->
+  <view class="card mt-32">
+    <!-- OCR 扫描按钮 -->
+    <view class="flex-column flex-center" bindtap="goToCamera">
+      <view class="icon-large bg-primary mb-16">
+        <text class="icon-large">📸</text>
+      </view>
+      <text class="text-title mb-8">拍照识别批次号</text>
+      <text class="text-small text-muted">支持自动识别批次号</text>
+    </view>
+
+    <!-- 分隔线 -->
+    <view class="mb-16">
+      <view class="text-muted" style="font-size: 16px;">—— 或 ——</view>
+    </view>
+
+    <!-- 手动输入按钮 -->
+    <view class="flex-column flex-center" bindtap="goToInput">
+      <view class="icon-medium bg-secondary">
+        <text class="icon-medium">🔍</text>
+      </view>
+      <text class="text-title">手动输入批次号</text>
+    </view>
+  </view>
+
+  <!-- 底部：历史记录 -->
+  <view class="mt-32">
+    <view class="flex-between mb-16">
+      <text class="text-title">📋 最近查询</text>
+      <text class="text-small text-primary" bindtap="goToHistory">查看全部 ></text>
+    </view>
+
+    <!-- 历史记录列表 -->
+    <block wx:for="{{item in recentHistory}}">
+      <view class="card mb-16" bindtap="goToHistoryDetail" data-batch="{{item.batchCode}}">
+        <view class="flex-between">
+          <view class="flex">
+            <text class="text-subtitle">{{item.batchCode}}</text>
+            <view class="status-badge {{item.statusClass}}">{{item.statusText}}</view>
+          </view>
+          <text class="text-small text-muted">{{item.timeAgo}}</text>
+        </view>
+        <view class="mt-8">
+          <text class="text-small">{{item.productName}}</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view wx:if="{{recentHistory.length === 0}}" class="flex-column flex-center pt-64 pb-64">
+      <view class="icon-large mb-32">📭</view>
+      <text class="text-title mb-16">暂无查询记录</text>
+      <view class="btn-secondary mt-24" bindtap="goToCamera">
+        <text class="text-title">去查询</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,25 @@
+{
+  "desc": "召回查询助手站点地图",
+  "rules": [
+    {
+      "page": "pages/index/index",
+      "path": "index",
+      "name": "首页"
+    },
+    {
+      "page": "pages/camera/camera", 
+      "path": "camera",
+      "name": "OCR识别"
+    },
+    {
+      "page": "pages/result/result",
+      "path": "result", 
+      "name": "查询结果"
+    },
+    {
+      "page": "pages/history/history",
+      "path": "history",
+      "name": "历史记录"
+    }
+  ]
+}
