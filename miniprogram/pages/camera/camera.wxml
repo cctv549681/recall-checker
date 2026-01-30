@@ -1,0 +1,108 @@
+<!--camera.wxml - OCR识别页面 -->
+<view class="container">
+  <!-- 顶部 -->
+  <view class="top-bar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <text class="title">拍照识别批次号</text>
+  </view>
+
+  <!-- 相机预览区 -->
+  <view class="camera-container">
+    <!-- 相机预览 -->
+    <view wx:if="{{!imagePath}}">
+      <camera
+        class="camera"
+        device-position="{{cameraPosition}}"
+        flash="{{flash}}"
+        bindstop="onStopCamera"
+        binderror="onCameraError"
+        bindtakephoto="onTakePhoto"
+        bindscancode="onScanCode"
+        frame-size="{{frameSize}}"
+      ></camera>
+    </view>
+
+    <!-- 图片显示（拍照或选择后） -->
+    <image
+      wx:if="{{imagePath}}"
+      class="preview-image"
+      src="{{imagePath}}"
+      mode="aspectFill"
+      bindtap="onRetakePhoto"
+    ></image>
+
+    <!-- 扫描框 -->
+    <view class="scan-frame">
+      <view class="scan-line scan-line-top"></view>
+      <view class="scan-line scan-line-left"></view>
+      <view class="scan-line scan-line-right"></view>
+      <view class="scan-line scan-line-bottom"></view>
+      <text class="scan-hint">对准批次号</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="bottom-buttons">
+      <!-- 相册按钮 -->
+      <view class="bottom-btn-left" bindtap="onChooseImage">
+        <text class="btn-text">🖼️ 相册</text>
+      </view>
+
+      <!-- 拍照按钮 -->
+      <view class="bottom-btn-center" bindtap="onTakePhoto">
+        <view class="camera-icon-large">📷</view>
+        <text class="btn-text">拍照</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提示文字 -->
+  <view wx:if="{{!imagePath}}" class="overlay-hint">
+    <view class="hint-box">
+      <text class="hint-text">请对准罐子底部的批次号</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">正在识别批次号...</text>
+  </view>
+
+  <!-- 识别结果弹窗 -->
+  <view wx:if="{{showResult}}" class="result-modal">
+    <view class="modal-mask" bindtap="hideResult"></view>
+    <view class="modal-content" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">识别结果</text>
+        <view class="close-btn" bindtap="hideResult">
+          <text>✕</text>
+        </view>
+      </view>
+
+      <view class="modal-body">
+        <view class="result-item">
+          <text class="result-label">批次号：</text>
+          <text class="result-value">{{batchCode}}</text>
+        </view>
+
+        <view class="result-accuracy">
+          <text class="result-label">置信度：</text>
+          <text class="result-value">{{accuracy}}%</text>
+        </view>
+
+        <view class="modal-actions">
+          <button class="btn btn-secondary" bindtap="hideResult">
+            <text>重新识别</text>
+          </button>
+          <button class="btn btn-primary" bindtap="confirmResult">
+            <text>确认查询</text>
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

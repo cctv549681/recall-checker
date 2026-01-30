@@ -1,0 +1,344 @@
+/**camera.wxss - 相机/OCR 识别页面样式**/
+
+page {
+  background-color: #F5F5F5;
+  height: 100vh;
+}
+
+/* 顶部区域 */
+.top-bar {
+  height: 96rpx;
+  padding: 0 32rpx;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #0078D7 0%, #005FA3 100%);
+}
+
+.back-btn {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  color: #ffffff;
+  font-size: 48rpx;
+  font-weight: bold;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+/* 相机容器 */
+.camera-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx;
+}
+
+.camera {
+  width: 100%;
+  height: 600rpx;
+  background: #000000;
+}
+
+.preview-image {
+  width: 100%;
+  height: 600rpx;
+  object-fit: contain;
+  border-radius: 16rpx;
+}
+
+/* 扫描框 */
+.scan-frame {
+  position: relative;
+  width: 500rpx;
+  height: 300rpx;
+  border: 4rpx solid #ffffff;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.scan-line {
+  position: absolute;
+  background: #ffffff;
+  opacity: 0.5;
+}
+
+.scan-line-top {
+  top: 50%;
+  left: 10%;
+  width: 80%;
+  height: 2rpx;
+}
+
+.scan-line-left {
+  top: 10%;
+  left: 50%;
+  width: 2rpx;
+  height: 80%;
+}
+
+.scan-line-right {
+  top: 10%;
+  right: 50%;
+  width: 2rpx;
+  height: 80%;
+}
+
+.scan-line-bottom {
+  bottom: 50%;
+  left: 10%;
+  width: 80%;
+  height: 2rpx;
+}
+
+.scan-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: bold;
+  padding: 16rpx 32rpx;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 16rpx;
+  white-space: nowrap;
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  height: 180rpx;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-top: 1rpx solid #e0e0e0;
+}
+
+.bottom-buttons {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 32rpx;
+}
+
+.bottom-btn-left,
+.bottom-btn-center {
+  flex: 0;
+}
+
+.bottom-btn {
+  width: 200rpx;
+  height: 160rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  color: #666666;
+}
+
+.camera-icon-large {
+  font-size: 96rpx;
+  line-height: 1;
+}
+
+.icon-medium {
+  font-size: 64rpx;
+  line-height: 1;
+}
+
+.btn-text {
+  margin-top: 8rpx;
+}
+
+/* 遮罩层 */
+.overlay-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+.hint-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 32rpx 48rpx;
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 16rpx;
+  z-index: 20;
+}
+
+.hint-text {
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* 加载状态 */
+.loading-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+}
+
+.loading-spinner {
+  width: 96rpx;
+  height: 96rpx;
+  border: 8rpx solid #00A651;
+  border-top: 8rpx solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 32rpx;
+}
+
+/* 结果弹窗 */
+.result-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 101;
+}
+
+.modal-content {
+  width: 80%;
+  max-width: 600rpx;
+  background: #ffffff;
+  border-radius: 32rpx;
+  padding: 48rpx;
+  z-index: 102;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333333;
+}
+
+.close-btn {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999999;
+  font-size: 48rpx;
+}
+
+.modal-body {
+  margin-bottom: 32rpx;
+}
+
+.result-item {
+  margin-bottom: 24rpx;
+}
+
+.result-label {
+  font-size: 28rpx;
+  color: #666666;
+  margin-bottom: 16rpx;
+}
+
+.result-value {
+  font-size: 32rpx;
+  color: #333333;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+}
+
+.result-accuracy {
+  font-size: 28rpx;
+  color: #52C41A;
+  margin-bottom: 16rpx;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 24rpx;
+}
+
+.btn {
+  flex: 1;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  border: none;
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #333333;
+}
+
+.btn-primary {
+  background-color: #00A651;
+  color: #ffffff;
+}
+
+.btn:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}

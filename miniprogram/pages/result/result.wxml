@@ -1,0 +1,107 @@
+<!--result.wxml - 查询结果页面 -->
+<view class="container">
+  <!-- 顶部 -->
+  <view class="top-bar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <text class="title">查询结果</text>
+  </view>
+
+  <!-- 召回状态卡片 -->
+  <view class="status-card status-{{status}}" bindtap="goToCamera">
+    <!-- 召回状态 -->
+    <view class="status-header">
+      <text class="status-icon">{{statusIcon}}</text>
+      <text class="status-title">{{statusTitle}}</text>
+    </view>
+
+    <!-- 风险等级（仅在召回中显示） -->
+    <view wx:if="{{status === 'recalled'}}" class="risk-level">
+      <text class="risk-label">风险等级：</text>
+      <text class="risk-badge risk-{{riskLevel}}">{{riskLevelText}}</text>
+    </view>
+  </view>
+
+  <!-- 产品详情 -->
+  <view class="card">
+    <view class="card-title">产品详情</view>
+
+    <view class="detail-item">
+      <text class="detail-label">品牌</text>
+      <text class="detail-value">{{brand}}</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">产品</text>
+      <text class="detail-value">{{productName}}</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">批次</text>
+      <text class="detail-value batch-code">{{batchCode}}</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">规格</text>
+      <text class="detail-value">{{packSize}}</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">有效期</text>
+      <text class="detail-value">{{bestBeforeText}}</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">地区</text>
+      <text class="detail-value">{{region}}</text>
+    </view>
+  </view>
+
+  <!-- 召回原因 -->
+  <view class="recall-reason">
+    <view class="reason-header">
+      <text class="reason-icon">⚠️</text>
+      <text class="reason-title">召回原因</text>
+    </view>
+    <view class="reason-content">
+      <text class="reason-text">{{recallReason}}</text>
+      <text wx:if="{{recallReasonDetail}}" class="reason-detail">{{recallReasonDetail}}</text>
+    </view>
+  </view>
+
+  <!-- 底部操作 -->
+  <view class="bottom-actions">
+    <!-- 官方来源链接 -->
+    <view class="action-btn" bindtap="openOfficialLink" wx:if="{{sourceUrl}}">
+      <text class="action-icon">🔗</text>
+      <text class="action-text">官方召回公告</text>
+    </view>
+
+    <!-- 保存到历史 -->
+    <view class="action-btn" bindtap="saveToHistory">
+      <text class="action-icon">📋</text>
+      <text class="action-text">保存记录</text>
+    </view>
+
+    <!-- 重新查询 -->
+    <view class="action-btn" bindtap="goToCamera">
+      <text class="action-icon">🔄</text>
+      <text class="action-text">重新查询</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">查询中...</text>
+  </view>
+
+  <!-- 未找到状态 -->
+  <view wx:if="{{status === 'not_found'}}" class="empty-state">
+    <view class="empty-icon">📭</view>
+    <text class="empty-text">未找到相关信息</text>
+    <text class="empty-desc">该批次号不在召回名单中</text>
+    <button class="empty-btn" bindtap="goToCamera">返回查询</button>
+  </view>
+</view>
