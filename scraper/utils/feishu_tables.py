@@ -20,64 +20,44 @@ TABLES_CONFIG = {
             {
                 "field_name": "brand",
                 "type": 1,  # text
-                "description": "品牌（雀巢、Abbott等）"
+                "description": "品牌（雀巢、Abbott等）",
             },
-            {
-                "field_name": "brand_en",
-                "type": 1,
-                "description": "品牌英文名"
-            },
-            {
-                "field_name": "product_name",
-                "type": 1,
-                "description": "产品名称"
-            },
-            {
-                "field_name": "sub_brand",
-                "type": 1,
-                "description": "子品牌（SMA、NAN）"
-            },
+            {"field_name": "brand_en", "type": 1, "description": "品牌英文名"},
+            {"field_name": "product_name", "type": 1, "description": "产品名称"},
+            {"field_name": "sub_brand", "type": 1, "description": "子品牌（SMA、NAN）"},
             {
                 "field_name": "batch_codes",
                 "type": 17,  # text（多值）
-                "description": "批次号列表（逗号分隔）"
+                "description": "批次号列表（逗号分隔）",
             },
             {
                 "field_name": "pack_size",
                 "type": 1,
-                "description": "包装规格（800g、400g）"
+                "description": "包装规格（800g、400g）",
             },
             {
                 "field_name": "best_before",
                 "type": 5,  # date
-                "description": "有效期"
+                "description": "有效期",
             },
             {
                 "field_name": "region",
                 "type": 17,
-                "description": "受影响地区（UK/US/EU/China）"
+                "description": "受影响地区（UK/US/EU/China）",
             },
-            {
-                "field_name": "recall_reason",
-                "type": 1,
-                "description": "召回原因"
-            },
+            {"field_name": "recall_reason", "type": 1, "description": "召回原因"},
             {
                 "field_name": "risk_level",
                 "type": 4,  # singleSelect
                 "description": "风险等级",
                 "property": {
-                    "options": [
-                        {"name": "高"},
-                        {"name": "中"},
-                        {"name": "低"}
-                    ]
-                }
+                    "options": [{"name": "高"}, {"name": "中"}, {"name": "低"}]
+                },
             },
             {
                 "field_name": "source_url",
                 "type": 15,  # url
-                "description": "官方来源链接"
+                "description": "官方来源链接",
             },
             {
                 "field_name": "source_type",
@@ -87,20 +67,12 @@ TABLES_CONFIG = {
                     "options": [
                         {"name": "官网"},
                         {"name": "政府平台"},
-                        {"name": "社交媒体"}
+                        {"name": "社交媒体"},
                     ]
-                }
+                },
             },
-            {
-                "field_name": "published_date",
-                "type": 5,
-                "description": "发布日期"
-            },
-            {
-                "field_name": "last_updated",
-                "type": 5,
-                "description": "最后更新日期"
-            },
+            {"field_name": "published_date", "type": 5, "description": "发布日期"},
+            {"field_name": "last_updated", "type": 5, "description": "最后更新日期"},
             {
                 "field_name": "status",
                 "type": 4,
@@ -109,52 +81,36 @@ TABLES_CONFIG = {
                     "options": [
                         {"name": "召回中"},
                         {"name": "已结束"},
-                        {"name": "待确认"}
+                        {"name": "待确认"},
                     ]
-                }
-            }
-        ]
+                },
+            },
+        ],
     },
     "brand_config": {
         "name": "品牌配置",
         "description": "品牌配置信息",
         "fields": [
-            {
-                "field_name": "brand_name",
-                "type": 1,
-                "description": "品牌名称"
-            },
-            {
-                "field_name": "brand_name_en",
-                "type": 1,
-                "description": "品牌英文名称"
-            },
-            {
-                "field_name": "sub_brands",
-                "type": 17,
-                "description": "子品牌列表"
-            },
+            {"field_name": "brand_name", "type": 1, "description": "品牌名称"},
+            {"field_name": "brand_name_en", "type": 1, "description": "品牌英文名称"},
+            {"field_name": "sub_brands", "type": 17, "description": "子品牌列表"},
             {
                 "field_name": "batch_pattern",
                 "type": 1,
-                "description": "批次号格式模式（正则）"
+                "description": "批次号格式模式（正则）",
             },
-            {
-                "field_name": "data_sources",
-                "type": 17,
-                "description": "数据源列表"
-            },
+            {"field_name": "data_sources", "type": 17, "description": "数据源列表"},
             {
                 "field_name": "last_scrape_date",
                 "type": 5,
-                "description": "最后爬取日期"
+                "description": "最后爬取日期",
             },
             {
                 "field_name": "active",
                 "type": 9,  # checkbox
-                "description": "是否激活"
-            }
-        ]
+                "description": "是否激活",
+            },
+        ],
     },
     "query_logs": {
         "name": "查询日志",
@@ -163,7 +119,7 @@ TABLES_CONFIG = {
             {
                 "field_name": "query_text",
                 "type": 1,
-                "description": "查询内容（OCR或手动输入）"
+                "description": "查询内容（OCR或手动输入）",
             },
             {
                 "field_name": "match_result",
@@ -173,28 +129,19 @@ TABLES_CONFIG = {
                     "options": [
                         {"name": "召回"},
                         {"name": "未召回"},
-                        {"name": "未找到"}
+                        {"name": "未找到"},
                     ]
-                }
+                },
             },
             {
                 "field_name": "query_method",
                 "type": 4,
                 "description": "查询方式",
-                "property": {
-                    "options": [
-                        {"name": "OCR"},
-                        {"name": "手动"}
-                    ]
-                }
+                "property": {"options": [{"name": "OCR"}, {"name": "手动"}]},
             },
-            {
-                "field_name": "query_date",
-                "type": 5,
-                "description": "查询时间"
-            }
-        ]
-    }
+            {"field_name": "query_date", "type": 5, "description": "查询时间"},
+        ],
+    },
 }
 
 
@@ -233,16 +180,11 @@ class FeishuTableManager:
         """
         # 创建表格
         table_data = {
-            "table": {
-                "name": config["name"],
-                "default_view_name": "默认视图"
-            }
+            "table": {"name": config["name"], "default_view_name": "默认视图"}
         }
 
         result = self.client._make_request(
-            "POST",
-            f"/bitable/v1/apps/{self.app_token}/tables",
-            table_data
+            "POST", f"/bitable/v1/apps/{self.app_token}/tables", table_data
         )
 
         table_id = result["table"]["table_id"]
@@ -260,7 +202,7 @@ class FeishuTableManager:
         field_data = {
             "field_name": field_config["field_name"],
             "type": field_config["type"],
-            "description": field_config["description"]
+            "description": field_config["description"],
         }
 
         # 添加可选属性（如单选选项）
@@ -271,9 +213,11 @@ class FeishuTableManager:
             result = self.client._make_request(
                 "POST",
                 f"/bitable/v1/apps/{self.app_token}/tables/{table_id}/fields",
-                field_data
+                field_data,
             )
-            print(f"    ✅ {field_config['field_name']}: {field_config.get('description', '')}")
+            print(
+                f"    ✅ {field_config['field_name']}: {field_config.get('description', '')}"
+            )
         except Exception as e:
             print(f"    ⚠️  {field_config['field_name']}: {e}")
 
@@ -281,8 +225,8 @@ class FeishuTableManager:
 def main():
     """主函数"""
     # 飞书凭证
-    app_id = "cli_a9f1919786f85cb3"
-    app_secret = "BcrZvWWswquglP6DBkLlccnuDtP3u1do"
+    app_id = "cli_a9f1f4887e38dcd2"
+    app_secret = "aNhAQdFTDJSWaQZnj2dy7dXvDgOzdi7u"
 
     # 从URL解析app_token
     app_token = "Af9TwoIEkiJwkhkq0YEcw3WRnMZ"
@@ -310,12 +254,16 @@ def main():
 APP_TOKEN = "{app_token}"
 
 TABLE_IDS = {{
-    "recalled_batches": "{table_ids.get('recalled_batches', '')}",
-    "brand_config": "{table_ids.get('brand_config', '')}",
-    "query_logs": "{table_ids.get('query_logs', '')}"
+    "recalled_batches": "{table_ids.get("recalled_batches", "")}",
+    "brand_config": "{table_ids.get("brand_config", "")}",
+    "query_logs": "{table_ids.get("query_logs", "")}"
 }}
 """
-        with open("/Users/jiang/clawd/recall-checker/scraper/utils/feishu_config.py", "w", encoding="utf-8") as f:
+        with open(
+            "/Users/jiang/clawd/recall-checker/scraper/utils/feishu_config.py",
+            "w",
+            encoding="utf-8",
+        ) as f:
             f.write(config_text)
 
         print("\n配置已保存到: scraper/utils/feishu_config.py")
