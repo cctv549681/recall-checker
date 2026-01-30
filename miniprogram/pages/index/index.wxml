@@ -1,8 +1,8 @@
-<!--index.wxml-->
+<!--index.wxml - 首页（更新版，添加手动输入功能）-->
 <view class="container">
   <!-- 顶部 -->
-  <view class="flex-between">
-    <image class="icon-small" src="/assets/nestle-logo.png" mode="aspectFit"></image>
+  <view class="top-bar">
+    <image class="logo-icon" src="/assets/nestle-logo.png" mode="aspectFit"></image>
     <text class="text-title">产品召回查询</text>
   </view>
 
@@ -17,17 +17,29 @@
       <text class="text-small text-muted">支持自动识别批次号</text>
     </view>
 
-    <!-- 分隔线 -->
-    <view class="mb-16">
-      <view class="text-muted" style="font-size: 16px;">—— 或 ——</view>
-    </view>
-
-    <!-- 手动输入按钮 -->
-    <view class="flex-column flex-center" bindtap="goToInput">
-      <view class="icon-medium bg-secondary">
-        <text class="icon-medium">🔍</text>
+    <!-- 手动输入 -->
+    <view class="input-section">
+      <view class="input-label">或手动输入批次号</view>
+      <view class="input-wrapper">
+        <input 
+          class="input" 
+          placeholder="请输入批次号，如：51450742F1"
+          bindinput="onManualInput"
+          value="{{manualBatchInput}}"
+          focus="{{inputFocused}}"
+          bindfocus="onInputFocus"
+          bindblur="onInputBlur"
+          confirm-type="done"
+        />
+        <view class="clear-btn" wx:if="{{manualBatchInput}}" bindtap="clearInput">
+          <text>✕</text>
+        </view>
       </view>
-      <text class="text-title">手动输入批次号</text>
+      <view class="input-actions">
+        <button class="btn-primary btn-full" bindtap="confirmInput">
+          <text class="btn-text">查询</text>
+        </button>
+      </view>
     </view>
   </view>
 
@@ -40,7 +52,7 @@
 
     <!-- 历史记录列表 -->
     <block wx:for="{{item in recentHistory}}">
-      <view class="card mb-16" bindtap="goToHistoryDetail" data-batch="{{item.batchCode}}">
+      <view class="history-card mb-16" bindtap="goToHistoryDetail" data-batch="{{item.batchCode}}">
         <view class="flex-between">
           <view class="flex">
             <text class="text-subtitle">{{item.batchCode}}</text>

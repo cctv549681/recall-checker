@@ -1,177 +1,287 @@
 # Recall Checker - 产品召回查询助手
 
-> 快速查询婴幼儿配方奶粉召回信息，保护宝宝健康
+> **快速查询婴幼儿配方奶粉召回信息，保护宝宝健康**
 
-## 📖 项目简介
+## 🌟 项目简介
 
-这是一个全球性的产品召回查询应用，专注于婴幼儿配方奶粉召回信息。用户可以通过 OCR 扫描或手动输入批次号，快速查询产品是否在召回名单中。
+这是一个全栈的产品召回查询系统，帮助用户快速查询婴幼儿配方奶粉召回信息。
 
 ### 核心功能
 
-- 📸 **OCR 识别**：拍照自动识别批次号
-- 🔍 **批次查询**：快速匹配召回数据库
-- 📊 **结果展示**：清晰的召回状态和详情
-- 📋 **历史记录**：本地保存查询历史
-- 🌍 **全球覆盖**：支持 Top 5 品牌的全球召回信息
+1. **OCR 批次号识别** - 拍照自动识别
+2. **手动批次号查询** - 支持模糊匹配
+3. **查询结果展示** - 清晰的召回状态和产品详情
+4. **查询历史记录** - 本地保存，快速查询
 
-## 🎯 目标市场
+---
 
-- 主要市场：中国大陆
-- 目标用户：婴幼儿父母、 caregivers
-- 品牌覆盖：雀巢、Abbott、Mead Johnson、Danone、FrieslandCampina
+## 📱 应用端：微信小程序
 
-## 🏗️ 技术架构
+### 已实现的功能
 
-```
-用户 → 微信小程序 → 飞书多维表格
-                ↓
-            Python 爬虫
-                ↓
-        官方数据源（官网、FDA、FSA等）
-```
+- ✅ 4 个核心页面
+  - 首页（OCR + 手动输入 + 历史记录）
+  - OCR 识别（相机 + 相册）
+  - 查询结果（召回状态 + 产品详情）
+  - 历史记录（筛选 + 列表）
 
-### 技术栈
+- ✅ 完整的 UI/UX 设计
+  - 雀巢主题色系
+  - 响应式布局
+  - 流畅的页面转场
+  - 实时的状态反馈
 
-| 组件 | 技术 |
-|------|------|
-| 前端 | 微信小程序原生 |
-| OCR | 百度 OCR API |
-| 数据库 | 飞书多维表格 |
-| 爬虫 | Python + Playwright |
-| 部署 | Vercel（免费） |
-| 版本控制 | Git / GitHub |
+- ✅ 核心交互逻辑
+  - 相机/相册选择
+  - OCR 识别（模拟实现）
+  - 批次号查询
+  - 历史记录管理
+
+- ✅ 本地数据存储
+  - 查询历史记录
+  - 筛选功能
+  - 清空历史
+
+---
+
+## 🕷️ 后端：数据爬虫
+
+### 已实现的功能
+
+- ✅ 雀巢召回数据爬虫
+  - 从 FSA（英国食品标准局）抓取召回信息
+  - 解析产品详情（批次、规格、有效期）
+  - 数据写入飞书多维表格
+  - 已采集 12 个雀巢 SMA 系列产品
+
+- ✅ 飞书 API 集成
+  - 批次号查询接口
+  - 模糊匹配算法
+  - 数据同步到飞书表格
+
+---
+
+## 🗄️ 数据库：飞书多维表格
+
+### 数据结构
+
+#### 召回批次表
+
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| brand | 文本 | 品牌（雀巢、Abbott等） |
+| brand_en | 文本 | 品牌英文名 |
+| product_name | 文本 | 产品名称 |
+| sub_brand | 文本 | 子品牌（SMA、NAN） |
+| batch_codes | 文本 | 批次号（逗号分隔） |
+| pack_size | 文本 | 包装规格（800g、400g） |
+| best_before | 日期时间 | 有效期 |
+| region | 文本 | 受影响地区 |
+| recall_reason | 文本 | 召回原因 |
+| risk_level | 单选 | 风险等级（高/中/低） |
+| source_url | 超链接 | 官方来源链接 |
+| source_type | 单选 | 数据源类型 |
+| published_date | 日期时间 | 发布日期 |
+| last_updated | 日期时间 | 最后更新日期 |
+| status | 单选 | 状态（召回中/已结束/待确认） |
+
+---
+
+## 🛠️ 技术栈
+
+### 前端
+
+| 技术 | 版本 | 说明 |
+|------|------|------|
+| 微信小程序 | v2 | 小程序框架 |
+| WXML/WXSS/WXSS | - | 小程序标记语言 |
+| JavaScript | ES6 | 页面逻辑 |
+| 微信云存储 | - | 本地数据持久化 |
+
+### 后端
+
+| 技术 | 版本 | 说明 |
+|------|------|------|
+| Python | 3.9+ | 爬虫开发语言 |
+| Requests | - | HTTP 请求库 |
+| BeautifulSoup | 4.x | HTML 解析库 |
+| 飞书开放平台 | v2 | API 服务 |
+
+---
 
 ## 📁 项目结构
 
 ```
 recall-checker/
-├── scraper/                  # 爬虫和数据采集
-│   ├── utils/               # 工具模块
-│   │   ├── feishu_client.py      # 飞书 API 客户端
-│   │   ├── feishu_tables.py      # 表格管理
-│   │   └── feishu_config.py      # 配置文件
-│   ├── feishu_test.py       # 飞书 API 测试工具
-│   ├── setup_table_v2.py    # 表格初始化脚本
-│   └── README_FEISHU.md     # 飞书集成文档
-├── miniapp/                  # 微信小程序（待开发）
-├── docs/                     # 项目文档
-├── logs/                     # 日志文件
-├── data/                     # 数据文件
-├── scripts/                  # 辅助脚本
-├── TASKS.md                  # 任务清单
-└── README.md                 # 本文件
+├── miniprogram/                    # 微信小程序
+│   ├── app.json                  # 小程序配置
+│   ├── app.wxss                  # 全局样式
+│   ├── sitemap.json               # 页面路由
+│   ├── config/
+│   │   └── project.config.js     # 项目配置
+│   ├── pages/
+│   │   ├── index/               # 首页
+│   │   │   ├── index.wxml      # 页面结构
+│   │   │   ├── index.wxss      # 页面样式
+│   │   │   └── index.js       # 页面逻辑
+│   │   ├── camera/              # OCR识别页面
+│   │   │   ├── camera.wxml     # 页面结构
+│   │   │   ├── camera.wxss     # 页面样式
+│   │   │   └── camera.js      # 页面逻辑
+│   │   ├── result/              # 查询结果页面
+│   │   │   ├── result.wxml     # 页面结构
+│   │   │   ├── result.wxss     # 页面样式
+│   │   │   └── result.js      # 页面逻辑
+│   │   └── history/             # 历史记录页面
+│   │       ├── history.wxml    # 页面结构
+│   │       ├── history.wxss    # 页面样式
+│   │       └── history.js     # 页面逻辑
+│   ├── utils/
+│   │   ├── api.js              # API 请求
+│   │   ├── storage.js          # 本地存储
+│   │   └── date.js            # 日期格式化
+│   └── README.md              # 小程序使用文档
+└── scraper/                       # 后端爬虫
+    ├── nestle_scraper.py           # 雀巢爬虫
+    ├── utils/
+    │   ├── feishu_client.py        # 飞书 API 客户端
+    │   ├── feishu_tables.py         # 飞书表格管理
+    │   ├── feishu_config.py        # 飞书配置
+    │   └── feishu_tables.py         # 飞书表格管理
+    └── README_FEISHU.md            # 飞书集成文档
 ```
+
+---
 
 ## 🚀 快速开始
 
 ### 环境要求
 
+- Node.js 16+
 - Python 3.9+
-- Node.js 16+（小程序开发）
-- 飞书账号（多维表格）
-- 百度 OCR API Key
+- 微信开发者工具
+- 飞书账号
+- 百度 OCR API Key（可选）
 
-### 安装
+### 安装步骤
 
-```bash
-# 克隆仓库
-git clone https://github.com/your-username/recall-checker.git
-cd recall-checker
+1. **克隆仓库**
+   ```bash
+   git clone https://github.com/cctv549681/recall-checker.git
+   cd recall-checker
+   ```
 
-# 安装 Python 依赖
-pip install -r requirements.txt
+2. **配置飞书**
+   - 在飞书开放平台创建应用
+   - 配置权限：多维表格（可管理）
+   - 更新 `scraper/utils/feishu_config.py`
 
-# 配置飞书凭证
-cp scraper/utils/feishu_config.py.example scraper/utils/feishu_config.py
-# 编辑 feishu_config.py，填入你的 APP_ID 和 APP_SECRET
-```
+3. **配置百度 OCR**
+   - 在百度智能云申请 OCR 服务
+   - 更新 `miniprogram/config/project.config.js`
 
-### 使用
+4. **运行爬虫**
+   ```bash
+   cd scraper
+   python nestle_scraper.py
+   ```
 
-#### 测试飞书 API
-
-```bash
-cd scraper
-python3 feishu_test.py
-```
-
-#### 初始化飞书表格
-
-```bash
-cd scraper
-python3 setup_table_v2.py
-```
-
-#### 运行爬虫（待开发）
-
-```bash
-cd scraper
-python3 nestle_scraper.py
-```
-
-## 📊 数据源
-
-| 品牌 | 数据源 | 状态 |
-|------|--------|------|
-| 雀巢 Nestlé | 官网、FSA | ⏳ 开发中 |
-| Abbott | similacrecall.com、FDA | ⏳ 待开发 |
-| Mead Johnson | FDA、官网 | ⏳ 待开发 |
-| Danone | 欧洲监管机构 | ⏳ 待开发 |
-| FrieslandCampina | 亚洲监管机构 | ⏳ 待开发 |
-
-## 📅 项目进度
-
-### 当前版本：v0.1（开发中）
-
-#### 已完成 ✅
-- [x] 项目规划和需求分析
-- [x] 飞书应用创建和配置
-- [x] 飞书多维表格搭建
-- [x] 飞书 API 集成和测试
-- [x] 召回批次数据表创建
-
-#### 进行中 ⏳
-- [ ] GitHub 仓库搭建
-- [ ] 小程序原型设计（Figma）
-- [ ] 小程序基础框架搭建
-
-#### 待开始 🔜
-- [ ] 雀巢官网爬虫开发
-- [ ] Abbott 召回页面爬虫
-- [ ] FDA 召回数据爬虫
-- [ ] 百度 OCR 集成
-- [ ] 批次号匹配算法开发
-
-## 🎯 MVP 目标（1.0版本）
-
-**发布时间**：3周内
-
-**成功指标**：
-- 小程序用户数：500+
-- 日活用户（DAU）：50+
-- 查询次数：2000+
-- OCR 识别准确率：>85%
-
-## 📖 文档
-
-- [项目计划](/Users/jiang/clawd/PROJECT_RECALL_CHECKER_PLAN.md)
-- [飞书集成文档](scraper/README_FEISHU.md)
-- [一人公司APP发布指南](/Users/jiang/clawd/ONE_PERSON_COMPANY_APP_GUIDE.md)
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 📄 许可证
-
-MIT License
-
-## 📞 联系方式
-
-- 项目负责人：意义
-- 技术支持：[GitHub Issues](https://github.com/your-username/recall-checker/issues)
+5. **打开小程序**
+   - 使用微信开发者工具导入 `miniprogram` 目录
+   - 配置 AppID
+   - 点击编译
 
 ---
 
-**最后更新**：2026-01-30
-**项目状态**：🚀 开发中
+## 📊 项目进度
+
+### Week 1（已完成）✅
+
+| 任务 | 状态 | 说明 |
+|------|------|------|
+| 飞书应用配置 | ✅ | 应用已创建，凭证已配置 |
+| 多维表格搭建 | ✅ | 表格已创建，16 个字段 |
+| GitHub 仓库 | ✅ | 代码已推送到 master |
+| 雀巢爬虫 | ✅ | 已采集 12 个产品数据 |
+| 小程序原型设计 | ✅ | 4 个页面设计完成 |
+| 小程序基础框架 | ✅ | 4 个页面 + UI 实现 |
+| OCR 功能 | ✅ | 相机/相册/模拟识别 |
+| 查询结果页面 | ✅ | 状态/详情/历史保存 |
+| 历史记录页面 | ✅ | 筛选/列表/清空 |
+
+**完成度：** **100%**（8/8 核心任务）
+
+---
+
+## 🎯 功能计划
+
+### v1.0（当前版本）
+
+✅ **已完成**：
+- 小程序基础框架
+- OCR 识别（模拟）
+- 批次号查询
+- 查询结果展示
+- 历史记录管理
+- 雀巢召回数据采集
+- 飞书 API 集成
+
+⏳ **进行中**：
+- 真实百度 OCR API 集成
+- Abbott 召回数据采集
+- FDA 召回数据采集
+
+🔜 **未开始**：
+- 批次号格式验证优化
+- 模糊匹配算法改进
+- 批量查询功能
+- 订阅提醒功能
+
+### v1.1（计划中）
+
+- [ ] Abbott 召回数据采集
+- [ ] FDA 召回数据采集
+- [ ] 批次号格式验证优化
+- [ ] 错误提示优化
+- [ ] 用户反馈功能
+
+### v1.2（计划中）
+
+- [ ] 订阅提醒功能
+- [ ] 批量查询功能
+- [ ] 数据可视化（召回趋势）
+- [ ] 用户社区
+- [ ] 多语言支持
+
+---
+
+## 🔒 安全说明
+
+### 敏感数据
+
+- 飞书应用凭证已提交到 `.gitignore`
+- API Key 需要手动配置
+- 用户数据仅存储在本地（小程序）
+- 不收集用户个人身份信息
+
+### 数据来源
+
+所有召回数据均来自：
+- 官方召回公告
+- 政府监管机构（FSA、FDA 等）
+- 品牌官方网站
+
+---
+
+## 📞 联系方式
+
+### 技术支持
+
+- **GitHub Issues**: https://github.com/cctv549681/recall-checker/issues
+- **开发文档**: `/miniprogram/README.md`
+
+---
+
+**项目状态**: 🚀 进行中
+**当前版本**: v1.0
+**最后更新**: 2026-01-30
