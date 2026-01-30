@@ -1,9 +1,10 @@
-// result.js - 查询结果页面逻辑
+// result.js - 查询结果页面逻辑（更新版，使用真实API）
 
 // 导入配置和工具
 const config = require('../../config/project.config.js');
-const { timeAgo, formatDate, formatShortDate, daysRemaining } = require('../../utils/date.js');
-const { saveHistory } = require('../../utils/storage.js');
+const FeishuTableManager = require('../../scraper/utils/feishu_client.js');
+const { saveHistory, timeAgo, formatDate, formatShortDate, daysRemaining } = require('../../utils/storage.js');
+const { formatDate, formatShortDate, daysRemaining } = require('../../utils/date.js');
 
 Page({
   data: {
@@ -17,11 +18,10 @@ Page({
     productName: '',
     batchCode: '',
     packSize: '',
-    bestBeforeText: '',
     bestBefore: null,
     region: '',
     recallReason: '',
-    recallReasonDetail: '',
+    recallReasonDetail: ''
 
     // 风险等级
     riskLevel: '',
@@ -39,6 +39,7 @@ Page({
 
     // 未找到时
     notFound: false,
+    notFoundText: ''
   },
 
   onLoad(options) {
@@ -47,9 +48,9 @@ Page({
 
     if (!batchCode) {
       wx.showToast({
-        title: '批次号不能为空',
-        icon: 'none'
-      });
+          title: '批次号不能为空',
+          icon: 'none'
+        });
       wx.navigateBack();
       return;
     }
@@ -66,149 +67,102 @@ Page({
   },
 
   /**
-   * 查询批次号
+   * 查询批次号（调用真实API）
    */
   async queryBatch(batchCode) {
     try {
-      // 模拟数据（实际应该从飞书查询）
-      const mockData = this.getMockData(batchCode);
+      // 标准化批次号
+      const normalizedBatch = batchCode.trim().toUpperCase();
 
-      // 显示结果
-      this.showResult(mockData);
+      // 调用飞书 API 查询
+      const result = await FeishuTableManager.searchBatch(normalizedBatch);
+
+      if (result.success && result.records.length > 0) {
+        // 找到匹配记录
+        const record = result.records[0];
+        this.showResult(record);
+      } else {
+        // 未找到
+        this.showNotFound();
+      }
 
     } catch (error) {
       console.error('查询失败:', error);
-      this.setData({
-        loading: false,
-        status: 'error'
-      });
-
-      wx.showToast({
-        title: '查询失败，请重试',
-        icon: 'none'
-      });
-    }
-  },
-
-  /**
-   * 获取模拟数据（实际应该调用飞书API）
-   */
-  getMockData(batchCode) {
-    // 批次号匹配数据库
-    const database = {
-      // 雀巢召回批次（12个产品，多个批次）
-      '51450742F1': {
-        brand: '雀巢 Nestlé',
-        brand_en: 'Nestlé',
-        product_name: 'SMA Advanced First Infant Milk',
-        pack_size: '800g',
-        best_before: 1800556800000, // 2027年5月
-        region: 'UK',
-        recall_reason: 'Cereulide毒素',
-        risk_level: 'high',
-        source_url: 'https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1',
-        source_type: '政府平台',
-        status: 'recalled'
-      },
-      '52319722BA': {
-        brand: '雀巢 Nestlé',
-        brand_en: 'Nestlé',
-        product_name: 'SMA Advanced First Infant Milk',
-        pack_size: '800g',
-        best_before: 1800556800000, // 2027年5月
-        region: 'UK',
-        recall_reason: 'Cereulide毒素',
-        risk_level: 'high',
-        source_url: 'https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1',
-        source_type: '政府平台',
-        status: 'recalled'
-      },
-      '51240742F2': {
-        brand: '雀巢 Nestlé',
-        brand_en: 'Nestlé',
-        product_name: 'SMA Advanced Follow-On Milk',
-        pack_size: '800g',
-        best_before: 1800556800000, // 2027年5月
-        region: 'UK',
-        recall_reason: 'Cereulide毒素',
-        risk_level: 'high',
-        source_url: 'https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1',
-        source_type: '政府平台',
-        status: 'recalled'
-      }
-    };
-
-    // 模糊匹配
-    let matchedCode = null;
-    for (const code in Object.keys(database)) {
-      if (code === batchCode) {
-        matchedCode = code;
-        break;
-      }
-      // 部分匹配（前4位或后4位）
-      if (code.includes(batchCode.slice(0, 4)) || code.includes(batchCode.slice(-4))) {
-        matchedCode = code;
-        break;
-      }
-    }
-
-    if (matchedCode) {
-      return database[matchedCode];
-    } else {
-      // 未找到
-      return {
-        brand: '',
-        product_name: '',
-        pack_size: '',
-        best_before: null,
-        region: '',
-        recall_reason: '未找到相关信息',
-        risk_level: 'low',
-        status: 'not_found'
-      };
+      this.showNotFound();
     }
   },
 
   /**
    * 显示查询结果
    */
-  showResult(data) {
-    // 格式化数据
-    const bestBeforeText = data.best_before ? formatDate(data.best_before) : '';
-    const riskLevelText = this.getRiskLevelText(data.risk_level);
-    const statusInfo = this.getStatusInfo(data.status);
+  showResult(record) {
+    const fields = record.fields || {};
+
+    // 格式化日期
+    const bestBefore = fields.best_before ? formatDate(fields.best_before) : '';
+    const bestBeforeShort = fields.best_before ? formatShortDate(fields.best_before) : '';
+
+    // 获取风险等级信息
+    const riskLevel = fields.risk_level || 'low';
+    const riskInfo = this.getRiskLevelInfo(riskLevel);
+
+    // 获取状态信息
+    const statusInfo = this.getStatusInfo(fields.status);
 
     this.setData({
       loading: false,
-      brand: data.brand,
-      productName: data.product_name,
+      brand: fields.brand || '',
+      productName: fields.product_name || '',
       batchCode: this.data.batchCode,
-      packSize: data.pack_size,
-      bestBefore: data.best_before,
-      bestBeforeText: bestBeforeText,
-      region: data.region,
-      recallReason: data.recall_reason,
-      recallReasonDetail: data.recall_reason,
-      risk_level: data.risk_level,
-      riskLevelText: riskLevelText.text,
-      riskLevelClass: riskLevelText.class,
-      sourceUrl: data.source_url,
-      sourceType: data.source_type,
-      status: data.status,
+      packSize: fields.pack_size || '',
+      bestBefore: fields.best_before,
+      bestBeforeText: bestBefore,
+      region: fields.region || '',
+      recallReason: fields.recall_reason || '',
+      recallReasonDetail: fields.recall_reason || '',
+      risk_level: riskLevel,
+      riskLevelText: riskInfo.text,
+      riskLevelClass: riskInfo.class,
+      sourceUrl: fields.source_url ? fields.source_url.link : '',
+      sourceType: fields.source_type || '',
+      status: fields.status || 'not_found',
       statusTitle: statusInfo.title,
       statusIcon: statusInfo.icon,
       statusClass: statusInfo.class,
-      notFound: data.status === 'not_found'
+      notFound: false
     });
 
     // 保存到历史记录
-    this.saveToHistory(data);
+    this.saveToHistory(record);
+  },
+
+  /**
+   * 显示未找到状态
+   */
+  showNotFound() {
+    const notFoundTexts = [
+      '未找到相关信息',
+      '该批次号不在召回名单中',
+      '您的产品是安全的'
+    ];
+
+    const randomText = notFoundTexts[Math.floor(Math.random() * notFoundTexts.length)];
+
+    this.setData({
+      loading: false,
+      notFound: true,
+      notFoundText: randomText,
+      status: 'not_found',
+      statusTitle: '未在召回名单',
+      statusIcon: '✅',
+      statusClass: 'status-success'
+    });
   },
 
   /**
    * 获取风险等级文本和样式
    */
-  getRiskLevelText(level) {
+  getRiskLevelInfo(level) {
     const levels = {
       high: { text: '高', class: 'risk-high' },
       medium: { text: '中', class: 'risk-medium' },
@@ -223,30 +177,30 @@ Page({
    */
   getStatusInfo(status) {
     const statusMap = {
-      recalled: {
+      'querying': {
+        title: '查询中',
+        icon: '⏳',
+        class: 'status-querying'
+      },
+      'recalled': {
         title: '召回中',
         icon: '⚠️',
         class: 'status-recalled'
       },
-      not_recalled: {
+      'not_recalled': {
         title: '未召回',
         icon: '✅',
         class: 'status-success'
       },
-      expired: {
+      'expired': {
         title: '已结束召回',
         icon: '✅',
         class: 'status-success'
       },
-      not_found: {
+      'not_found': {
         title: '未在召回名单',
         icon: '✅',
         class: 'status-success'
-      },
-      querying: {
-        title: '查询中',
-        icon: '⏳',
-        class: 'status-querying'
       }
     };
 
@@ -256,18 +210,20 @@ Page({
   /**
    * 保存到历史记录
    */
-  saveToHistory(data) {
+  saveToHistory(record) {
     try {
+      const fields = record.fields || {};
+      const batchCode = fields.batch_codes || '';
+
       const historyItem = {
-        batchCode: this.data.batchCode,
-        status: data.status,
-        productName: data.product_name,
-        brand: data.brand,
+        batchCode: batchCode,
+        status: fields.status || 'not_found',
+        productName: fields.product_name || '',
+        brand: fields.brand || '',
         queryTime: new Date().getTime()
       };
 
       saveHistory(historyItem);
-
       console.log('已保存历史记录:', historyItem);
 
     } catch (error) {
@@ -295,22 +251,37 @@ Page({
    * 打开官方链接
    */
   openOfficialLink() {
-    if (this.data.sourceUrl) {
+    const url = this.data.sourceUrl;
+
+    if (url) {
+      // 复制链接到剪贴板
       wx.setClipboardData({
-        data: this.data.sourceUrl,
+        data: url,
         success: () => {
           wx.showToast({
             title: '链接已复制',
-            icon: 'success'
+            icon: 'success',
+            duration: 2000
           });
         }
       });
 
-      // 尝试在浏览器中打开（如果支持）
-      // wx.openDocument({
-      //   fileType: 'url',
-      //   filePath: this.data.sourceUrl
-      // });
+      // 尝试打开链接
+      wx.showModal({
+        title: '官方链接',
+        content: `是否打开官方召回公告？\n${url}`,
+        confirmText: '打开',
+        cancelText: '取消',
+        success(modalRes) {
+          if (modalRes.confirm) {
+            wx.openDocument({
+              fileType: 'url',
+              filePath: url
+            });
+          }
+        }
+      });
+
     } else {
       wx.showToast({
         title: '暂无官方链接',
@@ -326,7 +297,7 @@ Page({
     const data = {
       batchCode: this.data.batchCode,
       status: this.data.status,
-      productName: this.data.product_name,
+      productName: this.data.productName,
       brand: this.data.brand,
       queryTime: new Date().getTime()
     };
