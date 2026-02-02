@@ -1,9 +1,6 @@
 // camera.js - OCR识别页面逻辑（更新版，使用真实API）
 
-// 导入配置和工具
-const config = require('../../config/project.config.js');
-const FeishuTableManager = require('../../scraper/utils/feishu_tables.py');
-const BaiduOCRClient = require('../../scraper/utils/baidu_ocr.py');
+// 导入工具
 const { saveHistory, timeAgo } = require('../../utils/storage.js');
 const { formatDate, formatShortDate } = require('../../utils/date.js');
 

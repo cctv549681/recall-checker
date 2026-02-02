@@ -1,9 +1,9 @@
-// result.js - 查询结果页面逻辑（更新版，使用真实API）
+// result.js - 查询结果页面逻辑（使用真实API）
 
 // 导入配置和工具
 const config = require('../../config/project.config.js');
-const FeishuTableManager = require('../../scraper/utils/feishu_client.js');
-const { saveHistory, timeAgo, formatDate, formatShortDate, daysRemaining } = require('../../utils/storage.js');
+const apiClient = require('../../utils/api_client.js');
+const { saveHistory, timeAgo } = require('../../utils/storage.js');
 const { formatDate, formatShortDate, daysRemaining } = require('../../utils/date.js');
 
 Page({
@@ -21,7 +21,7 @@ Page({
     bestBefore: null,
     region: '',
     recallReason: '',
-    recallReasonDetail: ''
+    recallReasonDetail: '',
 
     // 风险等级
     riskLevel: '',
@@ -67,27 +67,36 @@ Page({
   },
 
   /**
-   * 查询批次号（调用真实API）
+   * 查询批次号（使用真实API）
    */
   async queryBatch(batchCode) {
     try {
       // 标准化批次号
       const normalizedBatch = batchCode.trim().toUpperCase();
 
-      // 调用飞书 API 查询
-      const result = await FeishuTableManager.searchBatch(normalizedBatch);
+      // 调用 API 查询
+      const result = await apiClient.queryBatch(normalizedBatch);
 
-      if (result.success && result.records.length > 0) {
-        // 找到匹配记录
+      if (!result.success) {
+        throw new Error(result.message || '查询失败');
+      }
+
+      // 显示结果
+      if (result.matched && result.records && result.records.length > 0) {
+        // 找到召回记录
         const record = result.records[0];
         this.showResult(record);
       } else {
-        // 未找到
+        // 未找到召回记录
         this.showNotFound();
       }
 
     } catch (error) {
       console.error('查询失败:', error);
+      wx.showToast({
+        title: error.message || '查询失败',
+        icon: 'none'
+      });
       this.showNotFound();
     }
   },

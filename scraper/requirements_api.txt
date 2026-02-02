@@ -1,0 +1,15 @@
+# Recall Checker API Dependencies
+
+# Web Framework
+Flask>=3.0.0
+flask-cors>=4.0.0
+
+# Requests (已安装)
+requests>=2.31.0
+
+# PDF Parsing
+PyPDF2>=3.0.0
+
+# HTML Parsing
+beautifulsoup4>=4.12.0
+lxml>=4.9.0

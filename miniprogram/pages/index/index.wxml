@@ -51,7 +51,7 @@
     </view>
 
     <!-- 历史记录列表 -->
-    <block wx:for="{{item in recentHistory}}">
+    <block wx:for="{{recentHistory}}" wx:key="index">
       <view class="history-card mb-16" bindtap="goToHistoryDetail" data-batch="{{item.batchCode}}">
         <view class="flex-between">
           <view class="flex">

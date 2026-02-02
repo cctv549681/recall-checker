@@ -1,6 +1,7 @@
-// index.js - 首页（添加手动输入功能）
+// index.js - 首页（使用真实API）
 
 // 导入工具
+const apiClient = require('../../utils/api_client.js');
 const { saveHistory, timeAgo } = require('../../utils/storage.js');
 
 Page({

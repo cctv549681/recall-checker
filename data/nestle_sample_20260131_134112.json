@@ -1,0 +1,236 @@
+{
+  "brand": "雀巢",
+  "brand_key": "nestle",
+  "total_count": 12,
+  "sample_count": 12,
+  "samples": [
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA Advanced First Infant Milk",
+      "sub_brand": "SMA",
+      "batch_codes": "51450742F1, 52319722BA, 52819722AA",
+      "pack_size": "800g",
+      "best_before": 1809100800,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA Advanced Follow-On Milk",
+      "sub_brand": "SMA",
+      "batch_codes": "51240742F2",
+      "pack_size": "800g",
+      "best_before": 1809100800,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA Anti Reflux",
+      "sub_brand": "SMA",
+      "batch_codes": "51570742F3",
+      "pack_size": "800g",
+      "best_before": 1811779200,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA ALFAMINO",
+      "sub_brand": "SMA",
+      "batch_codes": "51200017Y3",
+      "pack_size": "400g",
+      "best_before": 1806508800,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA First Infant Milk",
+      "sub_brand": "SMA",
+      "batch_codes": "51170346AA,, 51170346AB",
+      "pack_size": "800g",
+      "best_before": 1806508800,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA First Infant Milk",
+      "sub_brand": "SMA",
+      "batch_codes": "51350346AA",
+      "pack_size": "400g",
+      "best_before": 1809100800,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA First Infant Milk",
+      "sub_brand": "SMA",
+      "batch_codes": "51340346BE",
+      "pack_size": "1.2kg",
+      "best_before": 1793462400,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA LITTLE STEPS First Infant Milk",
+      "sub_brand": "SMA",
+      "batch_codes": "51220346AD",
+      "pack_size": "800g",
+      "best_before": 1809100800,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA Comfort",
+      "sub_brand": "SMA",
+      "batch_codes": "52620742F3",
+      "pack_size": "800g",
+      "best_before": 1819728000,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA First Infant Milk",
+      "sub_brand": "SMA",
+      "batch_codes": "52860295M,, 52870295M,, 52870295M,, 53030295M,, 53040295M",
+      "pack_size": "200ml",
+      "best_before": 1790784000,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA First Infant Milk",
+      "sub_brand": "SMA",
+      "batch_codes": "53170742B1",
+      "pack_size": "70ml",
+      "best_before": 1793462400,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    },
+    {
+      "brand": "雀巢 Nestlé",
+      "brand_en": "Nestlé",
+      "product_name": "SMA Lactose Free",
+      "sub_brand": "SMA",
+      "batch_codes": "51500346AB",
+      "pack_size": "400g",
+      "best_before": 1809100800,
+      "region": "UK",
+      "recall_reason": "Cereulide毒素",
+      "risk_level": "高",
+      "source_url": {
+        "link": "https://www.food.gov.uk/news-alerts/alert/fsa-prin-02-2026-update-1"
+      },
+      "source_type": "政府平台",
+      "published_date": 1767628800,
+      "last_updated": 1769838071,
+      "status": "召回中"
+    }
+  ]
+}

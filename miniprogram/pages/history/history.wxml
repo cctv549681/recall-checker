@@ -30,7 +30,7 @@
 
   <!-- 历史记录列表 -->
   <view wx:if="{{historyList.length > 0}}">
-    <view wx:for="{{item in historyList}}" class="history-card" bindtap="goToResult" data-batch="{{item.batchCode}}">
+    <view wx:for="{{historyList}}" wx:key="index" class="history-card" bindtap="goToResult" data-batch="{{item.batchCode}}">
       <view class="history-content">
         <view class="history-left">
           <view class="batch-info">

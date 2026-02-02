@@ -212,7 +212,7 @@ async def main():
         print(f"   数据源: {recall.get('source_url', 'N/A')}")
 
     # 保存到JSON
-    output_file = "/Users/jiang/clawd/recall-checker/data/nestle_recalls.json"
+    output_file = "/root/clawd/recall-checker/data/nestle_recalls.json"
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(recalls, f, ensure_ascii=False, indent=2)
 
