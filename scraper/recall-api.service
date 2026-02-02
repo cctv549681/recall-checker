@@ -1,0 +1,17 @@
+[Unit]
+Description=Recall Checker API Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/clawd/recall-checker/scraper
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+ExecStart=/usr/bin/python3 api_server.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/root/clawd/recall-checker/scraper/logs/api.log
+StandardError=append:/root/clawd/recall-checker/scraper/logs/error.log
+
+[Install]
+WantedBy=multi-user.target
