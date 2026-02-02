@@ -9,7 +9,7 @@ const config = require('../config/project.config.js');
 class RecallApiClient {
   constructor() {
     // 使用云服务器API
-    this.localApiUrl = 'http://172.31.0.2:5001/api';
+    this.localApiUrl = 'http://14.103.26.111:5001/api';
     
     // 飞书API（备用）
     this.feishuApiUrl = config.feishu.apiUrl || 'https://open.feishu.cn/open-apis';
@@ -202,6 +202,46 @@ class RecallApiClient {
       }
     } catch (error) {
       console.error('获取统计失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * OCR图片识别
+   * @param {string} imageUrl - 图片URL
+   * @returns {Promise<Object>} 识别结果
+   */
+  async ocrImage(imageUrl) {
+    const url = `${this.localApiUrl}/ocr`;
+
+    try {
+      const response = await wx.request({
+        url,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          image_url: imageUrl
+        }
+      });
+
+      const result = response.data;
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data,
+          message: result.message
+        };
+      } else {
+        return {
+          success: false,
+          message: result.message || 'OCR识别失败'
+        };
+      }
+    } catch (error) {
+      console.error('OCR识别失败:', error);
       throw error;
     }
   }

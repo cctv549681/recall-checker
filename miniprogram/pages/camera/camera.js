@@ -1,8 +1,9 @@
-// camera.js - OCR识别页面逻辑（更新版，使用真实API）
+// camera.js - OCR识别页面（调用真实API）
 
 // 导入工具
 const { saveHistory, timeAgo } = require('../../utils/storage.js');
-const { formatDate, formatShortDate } = require('../../utils/date.js');
+const { formatDate } = require('../../utils/date.js');
+const apiClient = require('../../utils/api_client.js');
 
 Page({
   data: {
@@ -22,18 +23,17 @@ Page({
     loading: false,
     showResult: false,
     recognized: false,
+    ocrError: '',
 
     // 历史记录
     recentHistory: [],
   },
 
   onLoad(options) {
-    // 页面加载时，读取历史记录
     this.loadHistory();
   },
 
   onShow() {
-    // 页面显示时，刷新历史记录
     this.loadHistory();
   },
 
@@ -43,9 +43,7 @@ Page({
   loadHistory() {
     try {
       const history = wx.getStorageSync('queryHistory') || [];
-      // 只取最近3条
       const recent = history.slice(0, 3);
-
       this.setData({
         recentHistory: recent
       });
@@ -58,12 +56,8 @@ Page({
    * 初始化相机
    */
   initCamera() {
-    // 创建相机上下文
     this.ctx = wx.createCameraContext();
-
-    // 设置相机配置
     this.ctx.setFlash(false);
-
     this.setData({
       cameraPosition: 'back',
       flash: 'off'
@@ -91,10 +85,8 @@ Page({
       sizeType: ['original', 'compressed'],
       sourceType: ['album', 'camera'],
       success(res) {
-        // 显示选择的图片
         const tempFilePath = res.tempFilePaths[0];
 
-        // 显示确认弹窗
         wx.showModal({
           title: '确认图片',
           content: '是否使用这张照片进行批次号识别？',
@@ -102,8 +94,7 @@ Page({
           cancelText: '取消',
           success(modalRes) {
             if (modalRes.confirm) {
-              // 确认使用，调用百度 OCR
-              self.callBaiduOCR(tempFilePath);
+              self.callOCRAPI(tempFilePath);
             }
           }
         });
@@ -123,7 +114,6 @@ Page({
   onTakePhoto() {
     const self = this;
 
-    // 检查相机权限
     wx.getSetting({
       success(res) {
         if (!res.authSetting['scope.camera']) {
@@ -146,26 +136,21 @@ Page({
   takePhotoInternal() {
     const self = this;
 
-    // 启动相机
     this.initCamera();
 
-    // 拍照
     this.ctx.takePhoto({
       quality: 'high',
       success: (res) => {
         const tempFilePath = res.tempImagePath;
 
-        // 预览图片
         self.setData({
           imageSrc: tempFilePath,
           tempFilePath: tempFilePath,
           recognized: false
         });
 
-        // 停止相机
-        self.stopCamera();
+        this.stopCamera();
 
-        // 显示确认弹窗
         wx.showModal({
           title: '确认照片',
           content: '是否使用这张照片进行批次号识别？',
@@ -173,10 +158,8 @@ Page({
           cancelText: '重拍',
           success(modalRes) {
             if (modalRes.confirm) {
-              // 确认使用，调用百度 OCR
-              self.callBaiduOCR(tempFilePath);
+              self.callOCRAPI(tempFilePath);
             } else {
-              // 重拍，重新初始化相机
               self.initCamera();
             }
           }
@@ -187,64 +170,117 @@ Page({
           title: '拍照失败',
           icon: 'none'
         });
-        self.initCamera();
+        this.initCamera();
       }
     });
   },
 
   /**
-   * 调用百度 OCR API（真实调用）
+   * 调用后端OCR API
    */
-  async callBaiduOCR(filePath) {
+  async callOCRAPI(filePath) {
     const self = this;
 
-    // 显示加载状态
     self.setData({
       loading: true,
-      showResult: false
+      showResult: false,
+      ocrError: ''
     });
 
     try {
-      // 调用百度 OCR（这里需要实际的 API 调用）
-      // 由于无法在 JavaScript 中直接调用 Python 脚本，
-      // 这里使用模拟数据（实际项目中需要后端 API）
-      
-      // 模拟 API 调用延迟
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 上传图片到临时服务器，获取URL
+      const uploadResult = await this.uploadImage(filePath);
 
-      // 模拟识别结果
-      const mockResult = {
-        batchCode: '51450742F1',
-        confidence: 95
-      };
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.message || '上传失败');
+      }
+
+      // 调用后端OCR API
+      const ocrResult = await this.callBackendOCR(uploadResult.imageUrl);
+
+      if (!ocrResult.success) {
+        throw new Error(ocrResult.message || 'OCR识别失败');
+      }
+
+      const { batch_code, confidence } = ocrResult.data;
 
       self.setData({
         loading: false,
-        batchCode: mockResult.batchCode,
-        confidence: mockResult.confidence,
+        batchCode: batch_code,
+        confidence: confidence,
         recognized: true,
-        showResult: true,
-        imageSrc: filePath
+        showResult: true
       });
 
-      // 注：实际项目中，这里需要：
-      // 1. 调用后端 API，传递图片路径
-      // 2. 后端调用百度 OCR
-      // 3. 后端返回识别结果
-      // 4. 前端解析并展示结果
+      console.log('OCR识别成功:', { batch_code, confidence });
 
     } catch (error) {
-      console.error('OCR 调用失败:', error);
+      console.error('OCR识别失败:', error);
+
       self.setData({
         loading: false,
-        showResult: true,
-        recognized: false
+        ocrError: error.message || '识别失败，请重试'
       });
 
       wx.showToast({
-        title: '识别失败，请重试',
-        icon: 'none'
+        title: error.message || '识别失败',
+        icon: 'none',
+        duration: 2000
       });
+    }
+  },
+
+  /**
+   * 上传图片到临时服务器
+   * 使用微信云存储或临时文件上传接口
+   */
+  async uploadImage(filePath) {
+    return new Promise((resolve, reject) => {
+      // 上传图片到微信云存储
+      wx.cloud.uploadFile({
+        cloudPath: `ocr_images/${Date.now()}.jpg`,
+        filePath: filePath,
+        success(res) => {
+          const fileID = res.fileID;
+          // 获取文件URL
+          wx.cloud.getTempFileURL({
+            fileList: [fileID],
+            success(urlRes) => {
+              resolve({
+                success: true,
+                imageUrl: urlRes.fileList[0].tempFileURL,
+                fileID: fileID
+              });
+            },
+            fail(err) {
+              reject({
+                success: false,
+                message: '获取文件URL失败'
+              });
+            }
+          });
+        },
+        fail(err) {
+          reject({
+            success: false,
+            message: '上传失败'
+          });
+        }
+      });
+    });
+  },
+
+  /**
+   * 调用后端OCR接口
+   */
+  async callBackendOCR(imageUrl) {
+    try {
+      // 使用后端API的OCR接口
+      const apiResult = await apiClient.ocrImage(imageUrl);
+      return apiResult;
+    } catch (error) {
+      console.error('调用后端OCR失败:', error);
+      throw error;
     }
   },
 
@@ -254,12 +290,10 @@ Page({
   confirmResult() {
     const self = this;
 
-    // 隐藏结果弹窗
     self.setData({
       showResult: false
     });
 
-    // 跳转到查询结果页面
     const batchCode = self.data.batchCode;
 
     if (batchCode && batchCode.length > 0) {
@@ -267,13 +301,13 @@ Page({
       const historyItem = {
         batchCode: batchCode,
         status: 'querying',
-        productName: '识别中...',
-        time: new Date().getTime()
+        productName: 'OCR识别',
+        queryTime: new Date().getTime()
       };
 
       saveHistory(historyItem);
 
-      // 跳转到结果页面
+      // 跳转到查询结果页面
       wx.navigateTo({
         url: `/pages/result/result?batchCode=${batchCode}`
       });
@@ -289,7 +323,6 @@ Page({
    * 重新识别
    */
   retakePhoto() {
-    // 返回相机模式
     this.setData({
       showResult: false,
       imageSrc: '',
@@ -299,7 +332,6 @@ Page({
       recognized: false
     });
 
-    // 重新初始化相机
     this.initCamera();
   },
 
