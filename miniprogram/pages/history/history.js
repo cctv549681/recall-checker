@@ -126,7 +126,7 @@ Page({
   /**
    * 显示清空确认弹窗
    */
-  confirmClear() {
+  showClearModal() {
     this.setData({
       showClearModal: true
     });
@@ -144,21 +144,20 @@ Page({
   /**
    * 确认清空
    */
-  async confirmClear() {
+  confirmClearReal() {
     try {
       // 清空本地存储
-      const cleared = await clearHistory();
+      const cleared = clearHistory();
 
       if (cleared) {
         this.setData({
           historyList: [],
           showClearModal: false
         });
-
+      } else {
         wx.showToast({
-          title: '已清空',
-          icon: 'success',
-          duration: 2000
+          title: '清空失败',
+          icon: 'none'
         });
       }
 
@@ -177,6 +176,15 @@ Page({
   goToCamera() {
     wx.navigateTo({
       url: '/pages/camera/camera'
+    });
+  },
+
+  /**
+   * 跳转到首页
+   */
+  goToIndex() {
+    wx.switchTab({
+      url: '/pages/index/index'
     });
   }
 });

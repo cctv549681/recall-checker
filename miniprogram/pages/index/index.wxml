@@ -1,77 +1,143 @@
-<!--index.wxml - 首页（更新版，添加手动输入功能）-->
-<view class="container">
-  <!-- 顶部 -->
-  <view class="top-bar">
-    <image class="logo-icon" src="/assets/nestle-logo.png" mode="aspectFit"></image>
-    <text class="text-title">产品召回查询</text>
-  </view>
-
-  <!-- 主操作区 -->
-  <view class="card mt-32">
-    <!-- OCR 扫描按钮 -->
-    <view class="flex-column flex-center" bindtap="goToCamera">
-      <view class="icon-large bg-primary mb-16">
-        <text class="icon-large">📸</text>
-      </view>
-      <text class="text-title mb-8">拍照识别批次号</text>
-      <text class="text-small text-muted">支持自动识别批次号</text>
+<!--index.wxml - 首页（重构版：极简设计 + 内嵌相机）-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="navbar">
+    <view class="navbar-left">
+      <image class="logo" src="/assets/nestle-logo.png" mode="aspectFit"></image>
     </view>
-
-    <!-- 手动输入 -->
-    <view class="input-section">
-      <view class="input-label">或手动输入批次号</view>
-      <view class="input-wrapper">
-        <input 
-          class="input" 
-          placeholder="请输入批次号，如：51450742F1"
-          bindinput="onManualInput"
-          value="{{manualBatchInput}}"
-          focus="{{inputFocused}}"
-          bindfocus="onInputFocus"
-          bindblur="onInputBlur"
-          confirm-type="done"
-        />
-        <view class="clear-btn" wx:if="{{manualBatchInput}}" bindtap="clearInput">
-          <text>✕</text>
-        </view>
-      </view>
-      <view class="input-actions">
-        <button class="btn-primary btn-full" bindtap="confirmInput">
-          <text class="btn-text">查询</text>
-        </button>
-      </view>
+    <view class="navbar-center">
+      <text class="navbar-title">产品召回查询</text>
+    </view>
+    <view class="navbar-right" bindtap="goToHistory">
+      <text class="history-icon">📋</text>
     </view>
   </view>
 
-  <!-- 底部：历史记录 -->
-  <view class="mt-32">
-    <view class="flex-between mb-16">
-      <text class="text-title">📋 最近查询</text>
-      <text class="text-small text-primary" bindtap="goToHistory">查看全部 ></text>
+  <!-- 主内容区 -->
+  <view class="content">
+    <!-- Hero区域 -->
+    <view class="hero-section">
+      <view class="hero-icon">🔍</view>
+      <view class="hero-title">快速查询产品召回</view>
+      <view class="hero-subtitle">拍照或输入批次号，立即获取结果</view>
     </view>
 
-    <!-- 历史记录列表 -->
-    <block wx:for="{{recentHistory}}" wx:key="index">
-      <view class="history-card mb-16" bindtap="goToHistoryDetail" data-batch="{{item.batchCode}}">
-        <view class="flex-between">
-          <view class="flex">
-            <text class="text-subtitle">{{item.batchCode}}</text>
-            <view class="status-badge {{item.statusClass}}">{{item.statusText}}</view>
+    <!-- 内嵌相机区域 -->
+    <view class="camera-section">
+      <!-- 相机预览 -->
+      <view wx:if="{{showCamera}}" class="camera-wrapper">
+        <camera
+          class="camera-preview"
+          device-position="back"
+          flash="off"
+          bindtakephoto="onCameraTakePhoto"
+        ></camera>
+        <view class="camera-overlay">
+          <view class="scan-frame">
+            <view class="scan-corner scan-tl"></view>
+            <view class="scan-corner scan-tr"></view>
+            <view class="scan-corner scan-bl"></view>
+            <view class="scan-corner scan-br"></view>
+            <text class="scan-hint">对准批次号</text>
           </view>
-          <text class="text-small text-muted">{{item.timeAgo}}</text>
         </view>
-        <view class="mt-8">
-          <text class="text-small">{{item.productName}}</text>
+        <view class="camera-controls">
+          <view class="camera-btn-cancel" bindtap="closeCamera">
+            <text>取消</text>
+          </view>
+          <view class="camera-btn-shutter" bindtap="onCameraTakePhoto">
+            <view class="shutter-inner"></view>
+          </view>
+          <view class="camera-btn-album" bindtap="onChooseFromAlbum">
+            <text>相册</text>
+          </view>
         </view>
       </view>
-    </block>
 
-    <!-- 空状态 -->
-    <view wx:if="{{recentHistory.length === 0}}" class="flex-column flex-center pt-64 pb-64">
-      <view class="icon-large mb-32">📭</view>
-      <text class="text-title mb-16">暂无查询记录</text>
-      <view class="btn-secondary mt-24" bindtap="goToCamera">
-        <text class="text-title">去查询</text>
+      <!-- 拍照按钮（默认显示） -->
+      <view wx:if="{{!showCamera}}" class="action-section">
+        <!-- 大拍照按钮 -->
+        <view class="camera-card" bindtap="openCamera">
+          <view class="camera-btn-large">
+            <view class="camera-icon-wrapper">
+              <text class="camera-icon">📸</text>
+            </view>
+            <view class="camera-btn-text">
+              <text class="btn-title">拍照识别</text>
+              <text class="btn-subtitle">一键识别批次号</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 分隔线 -->
+        <view class="divider">
+          <text>或</text>
+        </view>
+
+        <!-- 手动输入区域 -->
+        <view class="input-card">
+          <view class="input-title">手动输入批次号</view>
+          <view class="input-group">
+            <input
+              class="input-field"
+              placeholder="例如：51450742F1"
+              placeholder-class="input-placeholder"
+              value="{{manualInput}}"
+              bindinput="onInput"
+              confirm-type="done"
+              bindconfirm="onConfirmInput"
+            />
+            <view wx:if="{{manualInput}}" class="clear-btn" bindtap="clearInput">
+              <text>✕</text>
+            </view>
+          </view>
+          <button class="query-btn" bindtap="onConfirmInput">
+            查询
+          </button>
+        </view>
+      </view>
+
+      <!-- OCR识别中 -->
+      <view wx:if="{{ocrLoading}}" class="loading-section">
+        <view class="loading-animation">
+          <view class="loading-spinner"></view>
+        </view>
+        <text class="loading-text">正在识别批次号...</text>
+      </view>
+    </view>
+
+    <!-- 历史记录 -->
+    <view class="history-section">
+      <view class="section-header">
+        <text class="section-title">最近查询</text>
+        <text class="section-more" bindtap="goToHistory">查看全部</text>
+      </view>
+
+      <!-- 历史记录列表 -->
+      <view wx:if="{{recentHistory.length > 0}}" class="history-list">
+        <view
+          class="history-item"
+          wx:for="{{recentHistory}}"
+          wx:key="index"
+          bindtap="onHistoryItemTap"
+          data-batch="{{item.batchCode}}"
+        >
+          <view class="history-content">
+            <view class="history-main">
+              <text class="batch-code">{{item.batchCode}}</text>
+              <view class="status-badge status-{{item.statusClass}}">{{item.statusText}}</view>
+            </view>
+            <text class="history-time">{{item.timeAgo}}</text>
+          </view>
+          <view wx:if="{{item.productName}}" class="history-product">{{item.productName}}</view>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view wx:if="{{recentHistory.length === 0}}" class="empty-state">
+        <view class="empty-icon">📭</view>
+        <text class="empty-text">暂无查询记录</text>
+        <text class="empty-hint">点击拍照按钮开始查询</text>
       </view>
     </view>
   </view>

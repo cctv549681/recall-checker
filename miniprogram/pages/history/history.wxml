@@ -1,91 +1,101 @@
-<!--history.wxml - 历史记录页面 -->
-<view class="container">
-  <!-- 顶部 -->
-  <view class="top-bar">
+<!--history.wxml - 历史记录页面（重构版）-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="navbar">
     <view class="back-btn" bindtap="goBack">
       <text class="back-icon">←</text>
     </view>
-    <text class="title">查询历史</text>
-    <view class="clear-btn" bindtap="confirmClear">
+    <text class="navbar-title">查询历史</text>
+    <view class="clear-btn" bindtap="showClearModal">
       <text class="clear-icon">🗑️</text>
-      <text class="clear-text">清空</text>
     </view>
   </view>
 
-  <!-- 筛选栏 -->
-  <view class="filter-bar">
-    <view class="filter-btn {{filter === 'all' ? 'active' : ''}}" bindtap="setFilter" data-filter="all">
-      <text class="filter-text">全部</text>
+  <!-- 筛选标签栏 -->
+  <view class="filter-tabs">
+    <view
+      class="tab-item {{filter === 'all' ? 'active' : ''}}"
+      bindtap="setFilter"
+      data-filter="all"
+    >
+      <text>全部</text>
     </view>
-    <view class="filter-btn {{filter === 'recalled' ? 'active' : ''}}" bindtap="setFilter" data-filter="recalled">
-      <text class="filter-text">召回中</text>
+    <view
+      class="tab-item {{filter === 'recalled' ? 'active' : ''}}"
+      bindtap="setFilter"
+      data-filter="recalled"
+    >
+      <text>召回中</text>
     </view>
-    <view class="filter-btn {{filter === 'not_recalled' ? 'active' : ''}}" bindtap="setFilter" data-filter="not_recalled">
-      <text class="filter-text">未召回</text>
+    <view
+      class="tab-item {{filter === 'not_recalled' ? 'active' : ''}}"
+      bindtap="setFilter"
+      data-filter="not_recalled"
+    >
+      <text>未召回</text>
     </view>
-    <view class="filter-btn {{filter === 'expired' ? 'active' : ''}}" bindtap="setFilter" data-filter="expired">
-      <text class="filter-text">已结束</text>
-    </view>
+  </view>
+
+  <!-- 统计信息 -->
+  <view wx:if="{{historyList.length > 0}}" class="stats-bar">
+    <text class="stats-text">共 {{historyList.length}} 条记录</text>
   </view>
 
   <!-- 历史记录列表 -->
-  <view wx:if="{{historyList.length > 0}}">
-    <view wx:for="{{historyList}}" wx:key="index" class="history-card" bindtap="goToResult" data-batch="{{item.batchCode}}">
-      <view class="history-content">
-        <view class="history-left">
-          <view class="batch-info">
+  <scroll-view wx:if="{{historyList.length > 0}}" class="history-scroll" scroll-y>
+    <view class="history-list">
+      <view
+        class="history-item"
+        wx:for="{{historyList}}"
+        wx:key="index"
+        bindtap="goToResult"
+        data-batch="{{item.batchCode}}"
+      >
+        <!-- 左侧：批次号和状态 -->
+        <view class="item-left">
+          <view class="batch-wrapper">
             <text class="batch-code">{{item.batchCode}}</text>
-            <view class="status-badge {{item.statusClass}}">{{item.statusText}}</view>
+            <view class="status-badge status-{{item.statusClass}}">{{item.statusText}}</view>
           </view>
-          <text class="time-ago">{{item.timeAgo}}</text>
+          <text class="time-text">{{item.timeAgo}}</text>
         </view>
-        <view class="history-right">
-          <text class="product-name">{{item.productName}}</text>
-          <view class="action-icon">👉</view>
+
+        <!-- 右侧：产品信息 -->
+        <view class="item-right">
+          <text class="product-text">{{item.productName}}</text>
+          <text class="arrow-icon">→</text>
         </view>
       </view>
     </view>
-  </view>
+  </scroll-view>
 
   <!-- 空状态 -->
   <view wx:if="{{historyList.length === 0}}" class="empty-state">
     <view class="empty-icon">📭</view>
     <text class="empty-title">暂无查询记录</text>
     <text class="empty-desc">您的查询记录将保存在本地</text>
-    <view class="empty-actions">
-      <button class="empty-btn" bindtap="goToCamera">
-        <text class="empty-btn-text">去查询</text>
-      </button>
-    </view>
+    <button class="empty-action-btn" bindtap="goToIndex">
+      开始查询
+    </button>
   </view>
 
-  <!-- 底部 -->
-  <view class="bottom-spacer"></view>
-
   <!-- 清空确认弹窗 -->
-  <view wx:if="{{showClearModal}}" class="modal-container">
+  <view wx:if="{{showClearModal}}" class="modal-overlay">
     <view class="modal-mask" bindtap="hideClearModal"></view>
-    <view class="modal-content" catchtap="">
-      <view class="modal-header">
-        <text class="modal-title">确认清空</text>
-        <view class="close-btn" bindtap="hideClearModal">
-          <text class="close-icon">✕</text>
-        </view>
-      </view>
-
-      <view class="modal-body">
+    <view class="modal-dialog" catchtap="">
+      <view class="modal-content">
         <view class="modal-icon">🗑️</view>
-        <text class="modal-text">确定要清空所有查询记录吗？</text>
-        <text class="modal-desc">此操作不可撤销</text>
-      </view>
+        <text class="modal-title">确认清空</text>
+        <text class="modal-desc">确定要清空所有查询记录吗？此操作不可撤销</text>
 
-      <view class="modal-actions">
-        <button class="btn btn-secondary" bindtap="hideClearModal">
-          <text class="btn-text">取消</text>
-        </button>
-        <button class="btn btn-danger" bindtap="confirmClear">
-          <text class="btn-text">确认清空</text>
-        </button>
+        <view class="modal-actions">
+          <button class="modal-btn modal-btn-secondary" bindtap="hideClearModal">
+            取消
+          </button>
+          <button class="modal-btn modal-btn-danger" bindtap="confirmClearReal">
+            确认清空
+          </button>
+        </view>
       </view>
     </view>
   </view>

@@ -10,10 +10,10 @@ class RecallApiClient {
   constructor() {
     // 使用云服务器API
     this.localApiUrl = 'http://14.103.26.111:5001/api';
-    
+
     // 飞书API（备用）
     this.feishuApiUrl = config.feishu.apiUrl || 'https://open.feishu.cn/open-apis';
-    
+
     // 当前使用的API类型
     this.apiType = 'local'; // 'local' 或 'feishu'
   }
@@ -37,11 +37,11 @@ class RecallApiClient {
       // 优先使用本地API
       if (this.apiType === 'local') {
         const result = await this.queryLocal(normalizedBatch);
-        
+
         if (result.success) {
           return result;
         }
-        
+
         // 本地API失败，回退到飞书API
         console.warn('本地API失败，回退到飞书API');
         this.apiType = 'feishu';
@@ -62,9 +62,9 @@ class RecallApiClient {
    */
   async queryLocal(batchCode) {
     const url = `${this.localApiUrl}/query`;
-    
-    try {
-      const response = await wx.request({
+
+    return new Promise((resolve, reject) => {
+      wx.request({
         url,
         method: 'POST',
         header: {
@@ -72,33 +72,35 @@ class RecallApiClient {
         },
         data: {
           batch_code: batchCode
+        },
+        success: (response) => {
+          const result = response.data;
+
+          if (result.success) {
+            // 转换为标准格式
+            resolve({
+              success: true,
+              matched: result.status === 'recalled',
+              records: result.data || [],
+              total: result.data ? result.data.length : 0,
+              message: result.message
+            });
+          } else {
+            resolve({
+              success: false,
+              matched: false,
+              records: [],
+              total: 0,
+              message: result.message || '查询失败'
+            });
+          }
+        },
+        fail: (error) => {
+          console.error('本地API查询失败:', error);
+          reject(error);
         }
       });
-
-      const result = response.data;
-
-      if (result.success) {
-        // 转换为标准格式
-        return {
-          success: true,
-          matched: result.status === 'recalled',
-          records: result.data || [],
-          total: result.data ? result.data.length : 0,
-          message: result.message
-        };
-      } else {
-        return {
-          success: false,
-          matched: false,
-          records: [],
-          total: 0,
-          message: result.message || '查询失败'
-        };
-      }
-    } catch (error) {
-      console.error('本地API查询失败:', error);
-      throw error;
-    }
+    });
   }
 
   /**
@@ -108,44 +110,51 @@ class RecallApiClient {
    */
   async queryFeishu(batchCode) {
     const url = `${this.feishuApiUrl}/bitable/v1/apps/${config.feishu.appToken}/tables/${config.feishu.tableId}/records/search`;
-    
+
     try {
-      // 获取token（这个部分需要实现飞书token获取逻辑）
+      // 获取token
       const token = await this.getFeishuToken();
 
-      const response = await wx.request({
-        url,
-        method: 'POST',
-        header: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json; charset=utf-8'
-        },
-        data: {
-          filter: {
-            conditions: [
-              {
-                field_name: "batch_codes",
-                operator: "contains",
-                value: [batchCode]
-              }
-            ]
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url,
+          method: 'POST',
+          header: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json; charset=utf-8'
+          },
+          data: {
+            filter: {
+              conditions: [
+                {
+                  field_name: "batch_codes",
+                  operator: "contains",
+                  value: [batchCode]
+                }
+              ]
+            }
+          },
+          success: (response) => {
+            const result = response.data;
+
+            if (result.code === 0) {
+              const records = result.data.items || [];
+              resolve({
+                success: true,
+                matched: records.length > 0,
+                records: records,
+                total: result.data.total || 0
+              });
+            } else {
+              reject(new Error(`查询失败: ${result.msg}`));
+            }
+          },
+          fail: (error) => {
+            console.error('飞书API查询失败:', error);
+            reject(error);
           }
-        }
+        });
       });
-
-      const result = response.data;
-
-      if (result.code === 0) {
-        const records = result.data.items || [];
-        return {
-          success: true,
-          matched: records.length > 0,
-          records: records,
-          total: result.data.total || 0
-        };
-      } else {
-        throw new Error(`查询失败: ${result.msg}`);
-      }
     } catch (error) {
       console.error('飞书API查询失败:', error);
       throw error;
@@ -158,23 +167,30 @@ class RecallApiClient {
    */
   async getFeishuToken() {
     const url = `${this.feishuApiUrl}/auth/v3/tenant_access_token/internal`;
-    
-    const response = await wx.request({
-      url,
-      method: 'POST',
-      data: {
-        app_id: config.feishu.appId,
-        app_secret: config.feishu.appSecret
-      }
+
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url,
+        method: 'POST',
+        data: {
+          app_id: config.feishu.appId,
+          app_secret: config.feishu.appSecret
+        },
+        success: (response) => {
+          const result = response.data;
+
+          if (result.code !== 0) {
+            reject(new Error(`获取飞书token失败: ${result.msg}`));
+          } else {
+            resolve(result.tenant_access_token);
+          }
+        },
+        fail: (error) => {
+          console.error('获取飞书token失败:', error);
+          reject(error);
+        }
+      });
     });
-
-    const result = response.data;
-    
-    if (result.code !== 0) {
-      throw new Error(`获取飞书token失败: ${result.msg}`);
-    }
-
-    return result.tenant_access_token;
   }
 
   /**
@@ -186,13 +202,20 @@ class RecallApiClient {
       // 优先使用本地API
       if (this.apiType === 'local') {
         const url = `${this.localApiUrl}/stats`;
-        
-        const response = await wx.request({
-          url,
-          method: 'GET'
-        });
 
-        return response.data;
+        return new Promise((resolve, reject) => {
+          wx.request({
+            url,
+            method: 'GET',
+            success: (response) => {
+              resolve(response.data);
+            },
+            fail: (error) => {
+              console.error('获取统计失败:', error);
+              reject(error);
+            }
+          });
+        });
       } else {
         // 飞书API不支持统计，返回空
         return {
@@ -214,8 +237,8 @@ class RecallApiClient {
   async ocrImage(imageUrl) {
     const url = `${this.localApiUrl}/ocr`;
 
-    try {
-      const response = await wx.request({
+    return new Promise((resolve, reject) => {
+      wx.request({
         url,
         method: 'POST',
         header: {
@@ -223,27 +246,29 @@ class RecallApiClient {
         },
         data: {
           image_url: imageUrl
+        },
+        success: (response) => {
+          const result = response.data;
+
+          if (result.success) {
+            resolve({
+              success: true,
+              data: result.data,
+              message: result.message
+            });
+          } else {
+            resolve({
+              success: false,
+              message: result.message || 'OCR识别失败'
+            });
+          }
+        },
+        fail: (error) => {
+          console.error('OCR识别失败:', error);
+          reject(error);
         }
       });
-
-      const result = response.data;
-
-      if (result.success) {
-        return {
-          success: true,
-          data: result.data,
-          message: result.message
-        };
-      } else {
-        return {
-          success: false,
-          message: result.message || 'OCR识别失败'
-        };
-      }
-    } catch (error) {
-      console.error('OCR识别失败:', error);
-      throw error;
-    }
+    });
   }
 
   /**
@@ -251,22 +276,24 @@ class RecallApiClient {
    * @returns {Promise<Object>} 健康状态
    */
   async healthCheck() {
-    try {
+    return new Promise((resolve) => {
       const url = `${this.localApiUrl}/health`;
-      
-      const response = await wx.request({
-        url,
-        method: 'GET'
-      });
 
-      return response.data;
-    } catch (error) {
-      console.error('健康检查失败:', error);
-      return {
-        status: 'error',
-        message: error.message
-      };
-    }
+      wx.request({
+        url,
+        method: 'GET',
+        success: (response) => {
+          resolve(response.data);
+        },
+        fail: (error) => {
+          console.error('健康检查失败:', error);
+          resolve({
+            status: 'error',
+            message: error.message
+          });
+        }
+      });
+    });
   }
 }
 
