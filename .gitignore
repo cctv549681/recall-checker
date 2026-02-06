@@ -4,3 +4,20 @@ node_modules/
 *.log
 project.config.json
 project.private.config.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+venv/
+ENV/
+
+# 测试覆盖率
+coverage/
+.pytest_cache/
+
+# 小程序编译
+miniprogram/coverage/

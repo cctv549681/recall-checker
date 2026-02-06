@@ -23,6 +23,15 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)  # 允许跨域请求
 
+# 导入 OCR 服务
+try:
+    from ocr_service import get_ocr_service
+    OCR_AVAILABLE = True
+    logger.info("OCR 服务模块加载成功")
+except ImportError as e:
+    OCR_AVAILABLE = False
+    logger.warning(f"OCR 服务模块加载失败: {e}")
+
 
 class FeishuAPI:
     """飞书API封装"""
@@ -323,6 +332,124 @@ def get_stats():
         }), 500
 
 
+@app.route('/api/ocr/status', methods=['GET'])
+def ocr_status():
+    """
+    获取 OCR 服务状态
+
+    返回:
+    {
+        "success": true,
+        "data": {
+            "available": true/false,
+            "provider": "baidu/glm",
+            "configured": true/false,
+            "uploader": "local/aliyun/tencent"
+        }
+    }
+    """
+    try:
+        if not OCR_AVAILABLE:
+            return jsonify({
+                "success": True,
+                "data": {
+                    "available": False,
+                    "provider": None,
+                    "configured": False,
+                    "uploader": None,
+                    "message": "OCR 服务模块不可用"
+                }
+            }), 200
+
+        ocr_service = get_ocr_service()
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "available": True,
+                "provider": ocr_service.provider,
+                "configured": ocr_service.is_configured,
+                "uploader": ocr_service._uploader.__class__.__name__ if ocr_service._uploader else None
+            },
+            "message": "获取 OCR 状态成功"
+        }), 200
+
+    except Exception as e:
+        logger.error(f"获取 OCR 状态异常: {e}")
+        return jsonify({
+            "success": False,
+            "message": f"获取 OCR 状态失败: {str(e)}"
+        }), 500
+
+
+@app.route('/api/ocr/switch', methods=['POST'])
+def ocr_switch():
+    """
+    切换 OCR 提供商
+
+    请求体:
+    {
+        "provider": "baidu/glm"
+    }
+
+    返回:
+    {
+        "success": true,
+        "data": {
+            "provider": "新的提供商"
+        }
+    }
+    """
+    try:
+        if not OCR_AVAILABLE:
+            return jsonify({
+                "success": False,
+                "message": "OCR 服务模块不可用"
+            }), 400
+
+        req_data = request.get_json()
+        if not req_data:
+            return jsonify({
+                "success": False,
+                "message": "请求数据为空"
+            }), 400
+
+        new_provider = req_data.get('provider', '').lower()
+        if new_provider not in ['baidu', 'glm']:
+            return jsonify({
+                "success": False,
+                "message": "不支持的 OCR 提供商，可选: baidu, glm"
+            }), 400
+
+        # 重置 OCR 服务（强制重新初始化）
+        from ocr_service import reset_ocr_service
+        reset_ocr_service()
+
+        # 设置环境变量
+        os.environ['OCR_PROVIDER'] = new_provider
+
+        # 获取新的 OCR 服务
+        ocr_service = get_ocr_service()
+
+        logger.info(f"OCR 提供商已切换到: {ocr_service.provider}")
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "provider": ocr_service.provider,
+                "configured": ocr_service.is_configured
+            },
+            "message": f"已切换到 {ocr_service.provider} OCR"
+        }), 200
+
+    except Exception as e:
+        logger.error(f"切换 OCR 提供商异常: {e}")
+        return jsonify({
+            "success": False,
+            "message": f"切换 OCR 提供商失败: {str(e)}"
+        }), 500
+
+
 @app.errorhandler(404)
 def not_found(error):
     """404错误"""
@@ -364,7 +491,7 @@ if __name__ == '__main__':
 @app.route('/api/ocr', methods=['POST'])
 def ocr_image():
     """
-    OCR图片识别批次号
+    OCR图片识别批次号（支持百度 OCR 和 GLM OCR）
 
     请求体:
     {
@@ -377,7 +504,9 @@ def ocr_image():
         "success": true,
         "data": {
             "batch_code": "批次号",
-            "confidence": 置信度
+            "confidence": 置信度,
+            "text": "全部文本",
+            "provider": "baidu/glm"
         },
         "message": "识别成功"
     }
@@ -395,139 +524,86 @@ def ocr_image():
 
         logger.info(f"OCR请求 - URL: {image_url[:50] if image_url else 'N/A'}, Base64: {'有' if image_base64 else '无'}")
 
-        # 模拟识别结果（TODO: 集成百度OCR API）
-        mock_result = {
-            "batch_code": "51450742F1",
-            "confidence": 85
-        }
+        # 检查 OCR 服务是否可用
+        if not OCR_AVAILABLE:
+            logger.warning("OCR 服务模块不可用，使用模拟数据")
 
-        result = {
-            "success": True,
-            "data": mock_result,
-            "message": "识别成功（模拟）"
-        }
-
-        logger.info(f"OCR识别结果: {mock_result}")
-        return jsonify(result), 200
-
-    except Exception as e:
-        logger.error(f"OCR识别异常: {e}")
-        return jsonify({
-            "success": False,
-            "message": f"识别失败: {str(e)}"
-        }), 500
-
-
-# 百度OCR配置
-BAIDU_API_KEY = os.getenv('BAIDU_API_KEY', '')
-BAIDU_SECRET_KEY = os.getenv('BAIDU_SECRET_KEY', '')
-
-
-@app.route('/api/ocr', methods=['POST'])
-def ocr_image():
-    """
-    OCR图片识别批次号（集成百度OCR）
-
-    请求体:
-    {
-        "image_url": "图片URL",
-        "image_base64": "图片Base64"
-    }
-
-    返回:
-    {
-        "success": true,
-        "data": {
-            "batch_code": "批次号",
-            "confidence": 置信度
-        },
-        "message": "识别成功"
-    }
-    """
-    try:
-        req_data = request.get_json()
-        if not req_data:
-            return jsonify({
-                "success": False,
-                "message": "请求数据为空"
-            }), 400
-
-        image_url = req_data.get('image_url', '')
-        image_base64 = req_data.get('image_base64', '')
-
-        logger.info(f"OCR请求 - URL: {image_url[:50] if image_url else 'N/A'}, Base64: {'有' if image_base64 else '无'}")
-
-        # 检查是否配置了百度OCR API Key
-        if not BAIDU_API_KEY or not BAIDU_SECRET_KEY:
-            logger.warning("百度OCR API Key未配置，使用模拟数据")
-            
             # 模拟OCR结果（用于测试）
             mock_result = {
                 "batch_code": "51450742F1",
-                "confidence": 85
+                "confidence": 85,
+                "text": "51450742F1",
+                "provider": "mock"
             }
-            
+
             result = {
                 "success": True,
                 "data": mock_result,
-                "message": "识别成功（模拟，请配置BAIDU_API_KEY和BAIDU_SECRET_KEY）"
+                "message": "识别成功（模拟，OCR 服务模块不可用）"
             }
-            
+
             logger.info(f"OCR识别结果（模拟）: {mock_result}")
             return jsonify(result), 200
 
-        # 使用百度OCR API
-        try:
-            from baidu_ocr import BaiduOCR
-            
-            ocr_client = BaiduOCR(api_key=BAIDU_API_KEY, secret_key=BAIDU_SECRET_KEY)
-            
-            # 判断使用URL还是Base64
-            if image_base64:
-                ocr_result = ocr_client.ocr_general(image_base64)
-            elif image_url:
-                # 从URL下载图片并转为Base64（简化处理，假设URL可直接访问）
-                ocr_result = ocr_client.ocr_general(image_url)
-            else:
-                return jsonify({
-                    "success": False,
-                    "message": "请提供image_url或image_base64"
-                }), 400
-            
-            if ocr_result.get("error_code") != "0":
-                return jsonify({
-                    "success": False,
-                    "message": f"OCR识别失败: {ocr_result.get('error_msg', '未知错误')}"
-                }), 400
-            
-            # 提取批次号
-            batch_info = ocr_client.extract_batch_code(ocr_result)
-            
+        # 使用 OCR 服务
+        ocr_service = get_ocr_service()
+
+        if not ocr_service.is_configured:
+            logger.warning(f"OCR 服务未配置（{ocr_service.provider}），使用模拟数据")
+
+            # 模拟OCR结果
+            mock_result = {
+                "batch_code": "51450742F1",
+                "confidence": 85,
+                "text": "51450742F1",
+                "provider": ocr_service.provider
+            }
+
             result = {
                 "success": True,
-                "data": batch_info,
+                "data": mock_result,
+                "message": f"识别成功（模拟，{ocr_service.provider} API Key 未配置）"
+            }
+
+            logger.info(f"OCR识别结果（模拟）: {mock_result}")
+            return jsonify(result), 200
+
+        # 判断使用 URL 还是 Base64
+        if image_base64:
+            ocr_result = ocr_service.recognize_base64(image_base64)
+        elif image_url:
+            ocr_result = ocr_service.recognize_url(image_url)
+        else:
+            return jsonify({
+                "success": False,
+                "message": "请提供 image_url 或 image_base64"
+            }), 400
+
+        # 返回结果
+        if ocr_result['success']:
+            result = {
+                "success": True,
+                "data": {
+                    "batch_code": ocr_result['batch_code'],
+                    "confidence": ocr_result['confidence'],
+                    "text": ocr_result['text'],
+                    "provider": ocr_result['provider']
+                },
                 "message": "识别成功"
             }
-            
-            logger.info(f"OCR识别结果: {batch_info}")
+
+            logger.info(f"OCR识别结果（{ocr_result['provider']}）: batch_code={ocr_result['batch_code']}, confidence={ocr_result['confidence']}")
             return jsonify(result), 200
-            
-        except ImportError:
-            logger.error("baidu_ocr模块未找到")
+        else:
             return jsonify({
                 "success": False,
-                "message": "百度OCR模块未找到"
-            }), 500
-            
-        except Exception as e:
-            logger.error(f"百度OCR识别异常: {e}")
-            return jsonify({
-                "success": False,
-                "message": f"OCR识别失败: {str(e)}"
-            }), 500
-            
+                "message": f"识别失败: {ocr_result.get('error', '未知错误')}"
+            }), 400
+
     except Exception as e:
         logger.error(f"OCR接口异常: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "success": False,
             "message": f"OCR识别失败: {str(e)}"
