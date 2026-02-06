@@ -183,7 +183,7 @@ Page({
    * 跳转到首页
    */
   goToIndex() {
-    wx.switchTab({
+    wx.reLaunch({
       url: '/pages/index/index'
     });
   }

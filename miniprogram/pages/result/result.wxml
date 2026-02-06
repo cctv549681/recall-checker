@@ -79,7 +79,7 @@
     </view>
 
     <!-- 保存到历史 -->
-    <view class="action-btn" bindtap="saveToHistory">
+    <view class="action-btn" bindtap="saveToHistoryUI">
       <text class="action-icon">📋</text>
       <text class="action-text">保存记录</text>
     </view>

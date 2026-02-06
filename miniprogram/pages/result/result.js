@@ -265,60 +265,38 @@ Page({
   openOfficialLink() {
     const url = this.data.sourceUrl;
 
-    if (url) {
-      // 复制链接到剪贴板
-      wx.setClipboardData({
-        data: url,
-        success: () => {
-          wx.showToast({
-            title: '链接已复制',
-            icon: 'success',
-            duration: 2000
-          });
-        }
-      });
-
-      // 尝试打开链接
-      wx.showModal({
-        title: '官方链接',
-        content: `是否打开官方召回公告？\n${url}`,
-        confirmText: '打开',
-        cancelText: '取消',
-        success(modalRes) {
-          if (modalRes.confirm) {
-            wx.openDocument({
-              fileType: 'url',
-              filePath: url
-            });
-          }
-        }
-      });
-
-    } else {
+    if (!url) {
       wx.showToast({
         title: '暂无官方链接',
         icon: 'none'
       });
+      return;
     }
-  },
 
-  /**
-   * 保存到历史
-   */
-  saveToHistory() {
-    const data = {
-      batchCode: this.data.batchCode,
-      status: this.data.status,
-      productName: this.data.productName,
-      brand: this.data.brand,
-      queryTime: new Date().getTime()
-    };
+    // 复制链接到剪贴板
+    wx.setClipboardData({
+      data: url,
+      success: () => {
+        console.log('链接已复制:', url);
+      }
+    });
 
-    saveHistory(data);
-
-    wx.showToast({
-      title: '已保存记录',
-      icon: 'success'
+    // 询问是否打开网页
+    wx.showModal({
+      title: '官方链接',
+      content: `是否打开官方召回公告？`,
+      confirmText: '打开',
+      cancelText: '已复制',
+      success: (modalRes) => {
+        if (modalRes.confirm) {
+          // 使用 web-view 或复制链接
+          wx.showModal({
+            title: '提示',
+            content: `链接已复制到剪贴板\n${url}`,
+            showCancel: false
+          });
+        }
+      }
     });
   },
 
@@ -327,5 +305,16 @@ Page({
    */
   retry() {
     this.queryBatch(this.data.batchCode);
+  },
+
+  /**
+   * 保存到历史（UI 按钮调用）
+   */
+  saveToHistoryUI() {
+    wx.showToast({
+      title: '已保存记录',
+      icon: 'success',
+      duration: 1500
+    });
   }
 });

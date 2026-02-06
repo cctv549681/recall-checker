@@ -166,15 +166,15 @@ Page({
     });
 
     try {
-      // 上传图片
-      const uploadResult = await this.uploadImage(filePath);
+      // 将图片转换为 base64
+      const base64Result = await this.imageToBase64(filePath);
 
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.message || '上传失败');
+      if (!base64Result.success) {
+        throw new Error(base64Result.message || '图片处理失败');
       }
 
-      // 调用OCR API
-      const ocrResult = await apiClient.ocrImage(uploadResult.imageUrl);
+      // 调用OCR API（使用base64）
+      const ocrResult = await apiClient.ocrImageBase64(base64Result.imageData);
 
       if (!ocrResult.success) {
         throw new Error(ocrResult.message || 'OCR识别失败');
@@ -209,36 +209,27 @@ Page({
   },
 
   /**
-   * 上传图片
+   * 将图片转换为 base64
    */
-  uploadImage(filePath) {
+  imageToBase64(filePath) {
     return new Promise((resolve, reject) => {
-      wx.cloud.uploadFile({
-        cloudPath: `ocr_images/${Date.now()}.jpg`,
+      const fs = wx.getFileSystemManager();
+
+      fs.readFile({
         filePath: filePath,
+        encoding: 'base64',
         success: (res) => {
-          const fileID = res.fileID;
-          wx.cloud.getTempFileURL({
-            fileList: [fileID],
-            success: (urlRes) => {
-              resolve({
-                success: true,
-                imageUrl: urlRes.fileList[0].tempFileURL,
-                fileID: fileID
-              });
-            },
-            fail: (err) => {
-              reject({
-                success: false,
-                message: '获取文件URL失败'
-              });
-            }
+          const base64Data = `data:image/jpeg;base64,${res.data}`;
+          resolve({
+            success: true,
+            imageData: base64Data
           });
         },
         fail: (err) => {
+          console.error('读取文件失败:', err);
           reject({
             success: false,
-            message: '上传失败'
+            message: '读取图片失败'
           });
         }
       });
