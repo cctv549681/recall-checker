@@ -102,6 +102,11 @@ class OCRService:
                 'base_path': os.environ.get('COS_BASE_PATH', 'ocr/')
             })
 
+        elif uploader_type == 'volcengine':
+            # 火山引擎 TOS
+            from utils.volcengine_uploader import create_volcengine_uploader
+            return create_volcengine_uploader()
+
         else:
             raise ValueError(f"不支持的图床类型: {uploader_type}")
 
