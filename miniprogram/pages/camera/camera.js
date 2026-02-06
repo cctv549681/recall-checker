@@ -3,7 +3,10 @@
 // 导入工具
 const { saveHistory, timeAgo } = require('../../utils/storage.js');
 const { formatDate } = require('../../utils/date.js');
-const apiClient = require('../../utils/api_client.js');
+const RecallApiClient = require('../../utils/api_client.js');
+
+// 实例化API客户端
+const apiClient = new RecallApiClient();
 
 Page({
   data: {
@@ -50,6 +53,15 @@ Page({
     } catch (error) {
       console.error('加载历史记录失败:', error);
     }
+  },
+
+  /**
+   * 返回上一页
+   */
+  goBack() {
+    wx.navigateBack({
+      delta: 1
+    });
   },
 
   /**
@@ -121,6 +133,13 @@ Page({
             scope: 'scope.camera',
             success() {
               self.takePhotoInternal();
+            },
+            fail() {
+              wx.showModal({
+                title: '需要相机权限',
+                content: '请授权使用相机功能',
+                showCancel: false
+              });
             }
           });
         } else {
@@ -188,15 +207,15 @@ Page({
     });
 
     try {
-      // 上传图片到临时服务器，获取URL
-      const uploadResult = await this.uploadImage(filePath);
+      // 将图片转换为 base64
+      const base64Result = await this.imageToBase64(filePath);
 
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.message || '上传失败');
+      if (!base64Result.success) {
+        throw new Error(base64Result.message || '图片处理失败');
       }
 
-      // 调用后端OCR API
-      const ocrResult = await this.callBackendOCR(uploadResult.imageUrl);
+      // 调用后端OCR API（使用base64）
+      const ocrResult = await this.callBackendOCR(base64Result.imageData);
 
       if (!ocrResult.success) {
         throw new Error(ocrResult.message || 'OCR识别失败');
@@ -231,39 +250,28 @@ Page({
   },
 
   /**
-   * 上传图片到临时服务器
-   * 使用微信云存储或临时文件上传接口
+   * 将图片转换为 base64 格式
    */
-  async uploadImage(filePath) {
+  async imageToBase64(filePath) {
     return new Promise((resolve, reject) => {
-      // 上传图片到微信云存储
-      wx.cloud.uploadFile({
-        cloudPath: `ocr_images/${Date.now()}.jpg`,
+      const fs = wx.getFileSystemManager();
+
+      fs.readFile({
         filePath: filePath,
-        success(res) => {
-          const fileID = res.fileID;
-          // 获取文件URL
-          wx.cloud.getTempFileURL({
-            fileList: [fileID],
-            success(urlRes) => {
-              resolve({
-                success: true,
-                imageUrl: urlRes.fileList[0].tempFileURL,
-                fileID: fileID
-              });
-            },
-            fail(err) {
-              reject({
-                success: false,
-                message: '获取文件URL失败'
-              });
-            }
+        encoding: 'base64',
+        success(res) {
+          const base64Data = `data:image/jpeg;base64,${res.data}`;
+          resolve({
+            success: true,
+            imageData: base64Data,
+            filePath: filePath
           });
         },
         fail(err) {
+          console.error('读取文件失败:', err);
           reject({
             success: false,
-            message: '上传失败'
+            message: '读取图片失败'
           });
         }
       });
@@ -273,10 +281,10 @@ Page({
   /**
    * 调用后端OCR接口
    */
-  async callBackendOCR(imageUrl) {
+  async callBackendOCR(imageBase64) {
     try {
-      // 使用后端API的OCR接口
-      const apiResult = await apiClient.ocrImage(imageUrl);
+      // 使用后端API的OCR接口（传递base64）
+      const apiResult = await apiClient.ocrImageBase64(imageBase64);
       return apiResult;
     } catch (error) {
       console.error('调用后端OCR失败:', error);

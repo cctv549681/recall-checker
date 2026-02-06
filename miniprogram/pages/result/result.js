@@ -2,9 +2,12 @@
 
 // 导入配置和工具
 const config = require('../../config/project.config.js');
-const apiClient = require('../../utils/api_client.js');
+const RecallApiClient = require('../../utils/api_client.js');
 const { saveHistory, timeAgo } = require('../../utils/storage.js');
 const { formatDate, formatShortDate, daysRemaining } = require('../../utils/date.js');
+
+// 实例化API客户端
+const apiClient = new RecallApiClient();
 
 Page({
   data: {

@@ -230,7 +230,7 @@ class RecallApiClient {
   }
 
   /**
-   * OCR图片识别
+   * OCR图片识别（使用图片URL）
    * @param {string} imageUrl - 图片URL
    * @returns {Promise<Object>} 识别结果
    */
@@ -246,6 +246,48 @@ class RecallApiClient {
         },
         data: {
           image_url: imageUrl
+        },
+        success: (response) => {
+          const result = response.data;
+
+          if (result.success) {
+            resolve({
+              success: true,
+              data: result.data,
+              message: result.message
+            });
+          } else {
+            resolve({
+              success: false,
+              message: result.message || 'OCR识别失败'
+            });
+          }
+        },
+        fail: (error) => {
+          console.error('OCR识别失败:', error);
+          reject(error);
+        }
+      });
+    });
+  }
+
+  /**
+   * OCR图片识别（使用Base64）
+   * @param {string} imageBase64 - 图片Base64数据
+   * @returns {Promise<Object>} 识别结果
+   */
+  async ocrImageBase64(imageBase64) {
+    const url = `${this.localApiUrl}/ocr`;
+
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          image_base64: imageBase64
         },
         success: (response) => {
           const result = response.data;

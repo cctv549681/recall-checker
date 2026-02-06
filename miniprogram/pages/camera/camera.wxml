@@ -11,26 +11,23 @@
   <!-- 相机预览区 -->
   <view class="camera-container">
     <!-- 相机预览 -->
-    <view wx:if="{{!imagePath}}">
+    <view wx:if="{{!imageSrc}}">
       <camera
         class="camera"
         device-position="{{cameraPosition}}"
         flash="{{flash}}"
-        bindstop="onStopCamera"
         binderror="onCameraError"
-        bindtakephoto="onTakePhoto"
-        bindscancode="onScanCode"
         frame-size="{{frameSize}}"
       ></camera>
     </view>
 
     <!-- 图片显示（拍照或选择后） -->
     <image
-      wx:if="{{imagePath}}"
+      wx:if="{{imageSrc}}"
       class="preview-image"
-      src="{{imagePath}}"
-      mode="aspectFill"
-      bindtap="onRetakePhoto"
+      src="{{imageSrc}}"
+      mode="aspectFit"
+      bindtap="retakePhoto"
     ></image>
 
     <!-- 扫描框 -->
@@ -60,7 +57,7 @@
   </view>
 
   <!-- 提示文字 -->
-  <view wx:if="{{!imagePath}}" class="overlay-hint">
+  <view wx:if="{{!imageSrc}}" class="overlay-hint">
     <view class="hint-box">
       <text class="hint-text">请对准罐子底部的批次号</text>
     </view>
@@ -91,11 +88,11 @@
 
         <view class="result-accuracy">
           <text class="result-label">置信度：</text>
-          <text class="result-value">{{accuracy}}%</text>
+          <text class="result-value">{{confidence}}%</text>
         </view>
 
         <view class="modal-actions">
-          <button class="btn btn-secondary" bindtap="hideResult">
+          <button class="btn btn-secondary" bindtap="retakePhoto">
             <text>重新识别</text>
           </button>
           <button class="btn btn-primary" bindtap="confirmResult">

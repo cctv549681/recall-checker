@@ -1,8 +1,11 @@
 // index.js - 首页（重构版：内嵌相机 + 极简流程）
 
 // 导入工具
-const apiClient = require('../../utils/api_client.js');
+const RecallApiClient = require('../../utils/api_client.js');
 const { saveHistory, getHistory, timeAgo } = require('../../utils/storage.js');
+
+// 实例化API客户端
+const apiClient = new RecallApiClient();
 
 Page({
   data: {
